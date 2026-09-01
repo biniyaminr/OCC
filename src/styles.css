@@ -1,0 +1,413 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-beige: var(--beige);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-coffee: var(--coffee);
+  --color-coffee-foreground: var(--coffee-foreground);
+  --color-charcoal: var(--charcoal);
+  --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --text-eyebrow: 0.72rem;
+  --text-display: clamp(2.5rem, 1.6rem + 3.4vw, 4.25rem);
+  --text-h1: clamp(2.25rem, 1.5rem + 2.8vw, 3.75rem);
+  --text-h2: clamp(1.9rem, 1.35rem + 2vw, 3rem);
+  --text-h3: clamp(1.35rem, 1.1rem + 0.9vw, 1.9rem);
+  --text-lede: clamp(1rem, 0.96rem + 0.25vw, 1.15rem);
+}
+
+:root {
+  --radius: 1.25rem;
+  /* Refined OCC warm editorial palette */
+  /*
+   * Burnt orange stays the brand hue, but #d95a00 only reaches 3.45:1 on the
+   * sand canvas and 3.74:1 under white text — fine for large type and UI
+   * boundaries, short of AA for body copy and button labels. `--primary-strong`
+   * is the same hue carried deeper so small text and solid CTAs clear 4.5:1.
+   *   #d95a00 on #f7f1e7 = 3.45:1   |  #a84400 on #f7f1e7 = 5.35:1
+   *   #fffaf3 on #d95a00 = 3.74:1   |  #fffaf3 on #a84400 = 5.79:1
+   */
+  --primary: #d95a00;
+  --primary-strong: #a84400;
+  --primary-hover: #8f3900;
+  --primary-foreground: #fffaf3;
+  --coffee: #6e5d52;
+  --coffee-foreground: #fcf9f3;
+  --gold: #f2a000;
+  --gold-foreground: #21150f;
+  --charcoal: #120e0d;
+
+  --background: #f7f1e7;
+  --foreground: #21150f;
+
+  --beige: #f2e9db;
+  --muted: #efe6d8;
+  --muted-foreground: #6e5d52;
+
+  --card: #fcf9f3;
+  --card-foreground: #21150f;
+  --popover: #fcf9f3;
+  --popover-foreground: #21150f;
+
+  --secondary: #f2e9db;
+  --secondary-foreground: #3a2a20;
+  --accent: #f2a000;
+  --accent-foreground: #21150f;
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: rgba(72, 48, 34, 0.16);
+  --input: rgba(72, 48, 34, 0.22);
+  --ring: #d95a00;
+}
+
+.dark {
+  --background: oklch(0.17 0.03 55);
+  --foreground: oklch(0.97 0.01 80);
+  --card: oklch(0.22 0.035 55);
+  --card-foreground: oklch(0.97 0.01 80);
+  --popover: oklch(0.22 0.035 55);
+  --popover-foreground: oklch(0.97 0.01 80);
+  --primary: oklch(0.55 0.16 55);
+  --primary-foreground: oklch(0.99 0.005 100);
+  --secondary: oklch(0.27 0.04 55);
+  --secondary-foreground: oklch(0.97 0.01 80);
+  --muted: oklch(0.27 0.04 55);
+  --muted-foreground: oklch(0.75 0.02 80);
+  --accent: oklch(0.78 0.19 75);
+  --accent-foreground: oklch(0.22 0.03 55);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.55 0.16 55);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.005em;
+    font-weight: 500;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* On charcoal the burnt-orange ring is too close to the ground; gold reads. */
+  .on-dark :focus-visible {
+    outline-color: var(--gold);
+  }
+}
+
+@utility container-x {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  max-width: 82.5rem;
+  @media (min-width: 768px) {
+    padding-inline: 2.5rem;
+  }
+}
+
+/*
+ * Eyebrows are 0.72rem — normal-size text, so they need the full 4.5:1.
+ * On light surfaces that means the deepened orange (5.35:1); on charcoal the
+ * deepened orange goes muddy, so gold carries it instead (8.96:1).
+ */
+@utility eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--primary-strong);
+}
+
+@utility eyebrow-on-dark {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+}
+
+@utility measure {
+  max-width: 62ch;
+}
+
+@utility section-y {
+  padding-block: 5rem;
+  @media (min-width: 768px) {
+    padding-block: 7.5rem;
+  }
+}
+
+@utility reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.8s ease-out,
+    transform 0.8s ease-out;
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Background treatments — one recipe per situation, never a one-off style.
+ * ------------------------------------------------------------------------- */
+
+/* Dark section canvas: charcoal lifted by a warm glow so it never reads flat. */
+@utility surface-dark {
+  background-color: var(--charcoal);
+  background-image: radial-gradient(ellipse at top, rgba(217, 90, 0, 0.1), transparent 60%);
+}
+
+/* Standard scrim for text over photography: bottom-anchored, clears 4.5:1. */
+@utility photo-scrim {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    to top,
+    rgba(18, 14, 13, 0.85) 0%,
+    rgba(18, 14, 13, 0.55) 35%,
+    transparent 65%
+  );
+}
+
+/* Hero adds a left-anchored pass so headline copy stays legible over the frame. */
+@utility photo-scrim-left {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    to right,
+    rgba(18, 14, 13, 0.85) 0%,
+    rgba(18, 14, 13, 0.55) 45%,
+    transparent 75%
+  );
+}
+
+/*
+ * Highland contour texture, drawn as an inline SVG data URI in --coffee
+ * (#6e5d52) at 4% — never a raster asset.
+ */
+@utility contour-texture {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'%3E%3Cg fill='none' stroke='%236e5d52' stroke-width='1.5' opacity='0.04'%3E%3Cpath d='M-40 90 C 180 30 340 130 540 100 C 760 66 900 156 1120 120 C 1230 104 1300 130 1340 118'/%3E%3Cpath d='M-40 150 C 190 90 350 190 550 160 C 770 126 910 216 1130 180 C 1240 164 1310 190 1340 178'/%3E%3Cpath d='M-40 210 C 200 150 360 250 560 220 C 780 186 920 276 1140 240 C 1250 224 1320 250 1340 238'/%3E%3Cpath d='M-40 270 C 210 210 370 310 570 280 C 790 246 930 336 1150 300 C 1260 284 1330 310 1340 298'/%3E%3Cpath d='M-40 330 C 220 270 380 370 580 340 C 800 306 940 396 1160 360 C 1265 344 1335 370 1340 358'/%3E%3Cpath d='M-40 390 C 230 330 390 430 590 400 C 810 366 950 456 1170 420 C 1270 404 1338 430 1340 418'/%3E%3Cpath d='M-40 450 C 240 390 400 490 600 460 C 820 426 960 516 1180 480 C 1275 464 1339 490 1340 478'/%3E%3Cpath d='M-40 510 C 250 450 410 550 610 520 C 830 486 970 576 1190 540 C 1280 524 1340 550 1340 538'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 1200px 600px;
+}
+
+/* Soft hairline between two same-coloured sections. */
+@utility section-hairline {
+  border-top: 1px solid var(--border);
+}
+
+@utility gold-underline {
+  position: relative;
+  &::after {
+    content: "";
+    display: block;
+    width: 3rem;
+    height: 3px;
+    background: var(--gold);
+    margin-top: 0.75rem;
+    border-radius: 2px;
+  }
+}
+
+/* Partners page: its own industrial/engineering identity, scoped */
+.partners-theme {
+  --radius: 0.25rem;
+  --primary: oklch(0.52 0.14 152);
+  --primary-foreground: oklch(0.99 0.005 150);
+  --gold: oklch(0.62 0.16 150);
+  --gold-foreground: oklch(0.99 0.005 150);
+
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.24 0.03 155);
+
+  --beige: oklch(0.97 0.015 150);
+  --muted: oklch(0.96 0.015 150);
+  --muted-foreground: oklch(0.48 0.03 155);
+
+  --card: oklch(0.99 0.006 150);
+  --card-foreground: oklch(0.24 0.03 155);
+  --secondary: oklch(0.95 0.02 150);
+  --secondary-foreground: oklch(0.28 0.04 155);
+  --accent: oklch(0.52 0.14 152);
+  --accent-foreground: oklch(0.99 0.005 150);
+  --border: oklch(0.24 0.03 155 / 14%);
+  --input: oklch(0.24 0.03 155 / 18%);
+  --ring: oklch(0.52 0.14 152);
+
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+@utility tech-grid {
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--foreground) 7%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--foreground) 7%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 64px 64px;
+}
+
+@keyframes blink-in {
+  0% {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(6px);
+  }
+  25% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+  35% {
+    opacity: 0.25;
+  }
+  45% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.4;
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes blink-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 0 transparent;
+  }
+  50% {
+    text-shadow: 0 0 22px color-mix(in oklab, var(--gold, currentColor) 65%, transparent);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@utility blink-in {
+  animation:
+    blink-in 1.6s cubic-bezier(0.22, 1, 0.36, 1) both,
+    blink-glow 2.8s ease-in-out 1.6s infinite;
+}
+
+@utility marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 22s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blink-in {
+    animation: none;
+  }
+  .marquee-track {
+    animation: none;
+  }
+}
+
+@utility topo-pattern {
+  background-image:
+    repeating-radial-gradient(
+      circle at 20% 30%,
+      color-mix(in oklab, var(--foreground) 5%, transparent) 0 1px,
+      transparent 1px 34px
+    ),
+    repeating-radial-gradient(
+      circle at 78% 72%,
+      color-mix(in oklab, var(--foreground) 4%, transparent) 0 1px,
+      transparent 1px 42px
+    );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

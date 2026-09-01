@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" role="img" aria-label="Product image not set yet">
+  <defs>
+    <linearGradient id="parchment" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4f2e9"/>
+      <stop offset="0.55" stop-color="#ece9dc"/>
+      <stop offset="1" stop-color="#e2e0d1"/>
+    </linearGradient>
+    <linearGradient id="hillFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c3cdbe"/>
+      <stop offset="1" stop-color="#b4c0ae"/>
+    </linearGradient>
+    <linearGradient id="hillNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9aab97"/>
+      <stop offset="1" stop-color="#87997f"/>
+    </linearGradient>
+    <pattern id="grain" width="6" height="6" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.6" fill="#17231b" opacity="0.05"/>
+      <circle cx="4" cy="4" r="0.6" fill="#17231b" opacity="0.04"/>
+    </pattern>
+  </defs>
+
+  <rect width="800" height="1000" fill="url(#parchment)"/>
+  <rect width="800" height="1000" fill="url(#grain)"/>
+
+  <!-- Highland horizon -->
+  <path d="M0 690 Q 150 610 300 660 T 560 640 Q 690 615 800 668 L800 1000 L0 1000 Z" fill="url(#hillFar)" opacity="0.55"/>
+  <path d="M0 780 Q 190 700 360 756 T 640 736 Q 730 720 800 760 L800 1000 L0 1000 Z" fill="url(#hillNear)" opacity="0.5"/>
+
+  <!-- Coffee cherry / seed mark -->
+  <g transform="translate(400 430)" fill="none" stroke="#5c7360" stroke-width="9" stroke-linecap="round">
+    <ellipse cx="0" cy="0" rx="112" ry="150" opacity="0.75"/>
+    <path d="M0 -140 C -46 -70 -46 70 0 140 C 46 70 46 -70 0 -140 Z" opacity="0.55"/>
+    <path d="M0 -140 L0 140" opacity="0.4" stroke-dasharray="16 18"/>
+  </g>
+  <g transform="translate(400 430)" fill="none" stroke="#8a6a2a" stroke-width="7" stroke-linecap="round" opacity="0.5">
+    <path d="M112 -128 C 168 -170 214 -160 236 -138 C 206 -96 152 -94 118 -118"/>
+    <path d="M112 -128 C 152 -136 194 -142 232 -140"/>
+  </g>
+
+  <text x="400" y="672" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="34" fill="#5c7360" opacity="0.8">No picture yet</text>
+  <text x="400" y="714" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="19" letter-spacing="5" fill="#8a7434" opacity="0.75">OCC · ETHIOPIA</text>
+</svg>
