@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
-import coffee from "@/assets/Coffee_Beans.jpg.asset.json";
-import sesame from "@/assets/Sesame.jpg.asset.json";
-import chickpeas from "@/assets/Chickpeas.jpg.asset.json";
-import sorghum from "@/assets/Sorghum.jpg.asset.json";
+import coffee from "@/assets/Coffee_Beans.jpg";
+import sesame from "@/assets/Sesame.jpg";
+import chickpeas from "@/assets/Chickpeas.jpg";
+import sorghum from "@/assets/Sorghum.jpg";
 import { useSiteContent } from "@/lib/site-content";
 import { onProductImageError, productImage } from "@/lib/product-image";
 
@@ -24,7 +24,7 @@ type Slide = {
  */
 const slides: Slide[] = [
   {
-    image: coffee.url,
+    image: coffee,
     kicker: "Coffee",
     title: "Ethiopian Arabica",
     caption: "Yirgacheffe · Sidamo · Guji · Harar — the coffee that moves the world",
@@ -32,21 +32,21 @@ const slides: Slide[] = [
     objectPosition: "center 30%",
   },
   {
-    image: sesame.url,
+    image: sesame,
     kicker: "Oilseeds",
     title: "Humera Sesame",
     caption: "Whitish, high-oil content export grade",
     slug: "sesame-seeds",
   },
   {
-    image: chickpeas.url,
+    image: chickpeas,
     kicker: "Pulses",
     title: "Kabuli Chickpeas",
     caption: "Bold-seeded, uniform caliber",
     slug: "chickpeas",
   },
   {
-    image: sorghum.url,
+    image: sorghum,
     kicker: "Cereals",
     title: "White Sorghum",
     caption: "Food & feed grade from the highlands",

@@ -1,37 +1,15 @@
-import coffeeBeans from "@/assets/Coffee_Beans.jpg.asset.json";
-import sesame from "@/assets/Sesame.jpg.asset.json";
-import soybean from "@/assets/Soybean.jpg.asset.json";
-import peanuts from "@/assets/Peanuts.jpg.asset.json";
-import lskb from "@/assets/Light_Speckled_Kidney_Beans.jpg.asset.json";
-import rskb from "@/assets/Red_Speckled_kidney_Beans.jpg.asset.json";
-import rkb from "@/assets/Redkidney_beans.jpg.asset.json";
-import chickpeas from "@/assets/Chickpeas.jpg.asset.json";
-import sorghum from "@/assets/Sorghum.jpg.asset.json";
-import corn from "@/assets/Corn.jpg.asset.json";
-import mung from "@/assets/Green_Mung_Bean.jpg.asset.json";
-// Origin coffee photography, one distinct lead image per growing region.
-import coffee1 from "@/assets/coffee_images_38.jpg.asset.json";
-import coffee2 from "@/assets/coffee_images_42.jpg.asset.json";
-import coffee3 from "@/assets/coffee_images_43.jpg.asset.json";
-import coffee4 from "@/assets/coffee_download_8.jpg.asset.json";
-import coffee5 from "@/assets/coffee_download_10.jpg.asset.json";
-import coffee6 from "@/assets/coffee_c09b5d34ed5147f6adbedbe39caa86bb.jpg.asset.json";
-import coffee7 from "@/assets/coffee_cda6e66d1d6c98e9a7c1304c446ec93e.jpg.asset.json";
-import coffee8 from "@/assets/coffee_d6d7ea64d1ec4c6083aae92ede163652.jpg.asset.json";
-import coffee9 from "@/assets/coffee_il_570xN.694080479_e6mr.jpg.asset.json";
-
-export const coffeeGallery = [
-  coffeeBeans.url,
-  coffee1.url,
-  coffee2.url,
-  coffee3.url,
-  coffee4.url,
-  coffee5.url,
-  coffee6.url,
-  coffee7.url,
-  coffee8.url,
-  coffee9.url,
-];
+import coffeeBeans from "@/assets/Coffee_Beans.jpg";
+import sesame from "@/assets/Sesame.jpg";
+import soybean from "@/assets/Soybean.jpg";
+import peanuts from "@/assets/Peanuts.jpg";
+import lskb from "@/assets/Light_Speckled_Kidney_Beans.jpg";
+import rskb from "@/assets/Red_Speckled_kidney_Beans.jpg";
+import rkb from "@/assets/Redkidney_beans.jpg";
+import chickpeas from "@/assets/Chickpeas.jpg";
+import sorghum from "@/assets/Sorghum.jpg";
+import corn from "@/assets/Corn.jpg";
+import mung from "@/assets/Green_Mung_Bean.jpg";
+import coffeeHighland from "@/assets/coffee-highland-1024.webp";
 
 export type Product = {
   slug: string;
@@ -66,8 +44,7 @@ export const categories: Category[] = [
       {
         slug: "yirgacheffe-coffee",
         name: "Yirgacheffe",
-        image: coffeeBeans.url,
-        gallery: [coffee1.url, coffee4.url],
+        image: coffeeBeans,
         imagePosition: "30% 30%",
         tagline: "Floral, citrus-bright washed Arabica from southern Ethiopia.",
         overview:
@@ -87,8 +64,7 @@ export const categories: Category[] = [
       {
         slug: "sidamo-coffee",
         name: "Sidamo",
-        image: coffee1.url,
-        gallery: [coffee2.url, coffeeBeans.url],
+        image: coffeeBeans,
         imagePosition: "70% 35%",
         tagline: "Balanced, wine-like Arabica with bright acidity.",
         overview:
@@ -108,8 +84,7 @@ export const categories: Category[] = [
       {
         slug: "guji-coffee",
         name: "Guji",
-        image: coffee2.url,
-        gallery: [coffee3.url, coffee5.url],
+        image: coffeeBeans,
         imagePosition: "50% 70%",
         tagline: "Bold, fruit-forward Arabica from the Oromia highlands.",
         overview:
@@ -129,8 +104,7 @@ export const categories: Category[] = [
       {
         slug: "lekempti-coffee",
         name: "Lekempti (Nekemte)",
-        image: coffee3.url,
-        gallery: [coffee4.url, coffee6.url],
+        image: coffeeBeans,
         imagePosition: "20% 65%",
         tagline: "Sun-dried natural Arabica from western Ethiopia.",
         overview:
@@ -150,8 +124,7 @@ export const categories: Category[] = [
       {
         slug: "harar-coffee",
         name: "Harar",
-        image: coffee4.url,
-        gallery: [coffee5.url, coffee7.url],
+        image: coffeeBeans,
         imagePosition: "80% 60%",
         tagline: "Iconic dry-processed Arabica with blueberry and wine notes.",
         overview:
@@ -171,8 +144,7 @@ export const categories: Category[] = [
       {
         slug: "jimma-coffee",
         name: "Jimma",
-        image: coffee5.url,
-        gallery: [coffee6.url, coffee8.url],
+        image: coffeeBeans,
         imagePosition: "40% 20%",
         tagline: "Full-bodied Arabica from the birthplace of coffee.",
         overview:
@@ -192,8 +164,7 @@ export const categories: Category[] = [
       {
         slug: "limmu-coffee",
         name: "Limmu",
-        image: coffee6.url,
-        gallery: [coffee7.url, coffee9.url],
+        image: coffeeHighland,
         imagePosition: "60% 80%",
         tagline: "Clean, wine-like washed Arabica from southwest Ethiopia.",
         overview:
@@ -213,8 +184,7 @@ export const categories: Category[] = [
       {
         slug: "bench-maji-coffee",
         name: "Bench Maji",
-        image: coffee7.url,
-        gallery: [coffee8.url, coffee9.url],
+        image: coffeeBeans,
         imagePosition: "25% 45%",
         tagline: "Forest-grown Arabica from Ethiopia's southwestern frontier.",
         overview:
@@ -242,7 +212,7 @@ export const categories: Category[] = [
       {
         slug: "sesame-seeds",
         name: "Sesame Seeds",
-        image: sesame.url,
+        image: sesame,
         tagline: "Humera & Wollega whitish sesame with high oil content.",
         overview:
           "Ethiopia is one of the world's top sesame origins, prized for its clean, sweet flavor and high oil yield. Cleaned to buyer-defined purity.",
@@ -261,7 +231,7 @@ export const categories: Category[] = [
       {
         slug: "soybeans",
         name: "Soybeans",
-        image: soybean.url,
+        image: soybean,
         tagline: "Non-GMO Ethiopian soybeans for food and feed markets.",
         overview:
           "Naturally cultivated non-GMO soybeans with strong protein content, suited to plant-protein processing, oil crushing, and animal feed.",
@@ -280,7 +250,7 @@ export const categories: Category[] = [
       {
         slug: "peanuts",
         name: "Peanuts",
-        image: peanuts.url,
+        image: peanuts,
         tagline: "Java and Roba varieties, hand-sorted for export.",
         overview:
           "Ethiopian groundnuts with sweet flavor and low aflatoxin risk when properly stored. Available blanched or in-skin.",
@@ -307,7 +277,7 @@ export const categories: Category[] = [
       {
         slug: "light-speckled-kidney-beans",
         name: "Light Speckled Kidney Beans",
-        image: lskb.url,
+        image: lskb,
         tagline: "Sugar / cranberry beans with soft skin and creamy texture.",
         overview:
           "Also known as sugar or cranberry beans. Bright cream background with pink-red speckling, prized in Mediterranean and Middle Eastern markets.",
@@ -326,7 +296,7 @@ export const categories: Category[] = [
       {
         slug: "red-speckled-kidney-beans",
         name: "Red Speckled Kidney Beans",
-        image: rskb.url,
+        image: rskb,
         tagline: "Bold red-and-cream speckle, popular across Africa & Europe.",
         overview:
           "Vibrant speckled kidney beans with firm skin and rich flavor after cooking. A staple across African and European kitchens.",
@@ -345,7 +315,7 @@ export const categories: Category[] = [
       {
         slug: "red-kidney-beans",
         name: "Red Kidney Beans",
-        image: rkb.url,
+        image: rkb,
         tagline: "Deep red, uniform kidneys with excellent cook-out.",
         overview:
           "Uniform dark red kidney beans with clean color and firm shape after canning. Backbone of chili, stews, and salads worldwide.",
@@ -364,7 +334,7 @@ export const categories: Category[] = [
       {
         slug: "chickpeas",
         name: "Chickpeas",
-        image: chickpeas.url,
+        image: chickpeas,
         tagline: "Kabuli-type chickpeas with large caliber and creamy taste.",
         overview:
           "Ethiopia is a leading African producer of Kabuli chickpeas. Large-caliber, uniform seeds ideal for canning and hummus manufacturing.",
@@ -391,7 +361,7 @@ export const categories: Category[] = [
       {
         slug: "sorghum",
         name: "Sorghum",
-        image: sorghum.url,
+        image: sorghum,
         tagline: "White food-grade sorghum for milling and brewing.",
         overview:
           "Clean white sorghum grown in Ethiopia's lowlands. Suited to flour milling, brewing, and animal feed markets.",
@@ -410,7 +380,7 @@ export const categories: Category[] = [
       {
         slug: "corn",
         name: "Corn (Maize)",
-        image: corn.url,
+        image: corn,
         tagline: "Yellow food & feed-grade maize, clean and dry.",
         overview:
           "Ethiopian yellow maize suited to feed millers and food processors. Clean, well-dried, and screened for foreign matter.",
@@ -430,7 +400,7 @@ export const categories: Category[] = [
   },
 ];
 
-export const galleryMungBean = mung.url;
+export const galleryMungBean = mung;
 
 // Flat lookups
 export const allProducts: (Product & { categoryId: string; categoryTitle: string })[] =

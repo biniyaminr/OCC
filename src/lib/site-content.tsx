@@ -11,7 +11,7 @@ import {
 } from "react";
 import heroImage from "@/assets/coffee-farm-hero.jpg";
 // The About section needs its own frame — reusing the hero verbatim read as a bug.
-import aboutImage from "@/assets/coffee_il_570xN.694080479_e6mr.jpg.asset.json";
+import aboutImage from "@/assets/coffee-producer-570.webp";
 import { allProducts, categories, type Category, type Product } from "@/data/products";
 import { partners, type Partner } from "@/data/partners";
 import {
@@ -143,7 +143,7 @@ export const defaultSiteContent: SiteContent = {
       accent: "agricultural excellence.",
       description:
         "Oragon Commodity Center exists to connect the world's markets with Ethiopia's agricultural excellence through trusted partnerships, uncompromising quality, transparent trade, and innovative commodity solutions that create lasting value for producers, customers, and future generations.",
-      image: aboutImage.url,
+      image: aboutImage,
       imageCaption: "Sourced at origin across Ethiopia's highland growing regions.",
     },
     products: {
