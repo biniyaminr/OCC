@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useSiteContent } from "@/lib/site-content";
+import { scrollToTop } from "@/lib/scroll";
 
 const nav = [
   { label: "About", href: "#about" },
@@ -125,6 +126,17 @@ export function SiteHeader() {
   const isActive = (n: (typeof nav)[number]) =>
     n.route ? pathname.startsWith(n.href) : activeHash === n.href;
 
+  const onBrandClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      setOpen(false);
+      if (pathname !== "/") return; // let the router navigate
+      event.preventDefault();
+      setActiveHash("");
+      scrollToTop();
+    },
+    [pathname],
+  );
+
   const onAnchorClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, hash: string) => {
       if (pathname !== "/") return;
@@ -152,7 +164,12 @@ export function SiteHeader() {
       }`}
     >
       <div className="container-x grid h-[4.25rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 lg:h-[4.875rem]">
-        <Link to="/" className="flex min-w-0 items-center gap-3">
+        <Link
+          to="/"
+          onClick={onBrandClick}
+          aria-label={`${content.brand.shortName} — go to homepage`}
+          className="flex min-w-0 items-center gap-3 rounded-xl"
+        >
           <img
             src={content.brand.logo}
             alt={content.brand.name}

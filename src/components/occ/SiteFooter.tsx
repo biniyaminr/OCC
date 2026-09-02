@@ -1,15 +1,31 @@
 import { Facebook, Instagram, Mail } from "lucide-react";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useSiteContent } from "@/lib/site-content";
+import { scrollToTop } from "@/lib/scroll";
 
 export function SiteFooter() {
   const { content } = useSiteContent();
   const contact = content.home.contact;
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+
+  // On the homepage the router has nowhere to go, so scroll up ourselves.
+  const onBrandClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname !== "/") return;
+    event.preventDefault();
+    scrollToTop();
+  };
+
   return (
     <footer className="on-dark bg-[oklch(0.16_0.02_45)] text-white/80">
       <div className="container-x py-16 md:py-20">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <div className="flex items-center gap-2.5">
+            <Link
+              to="/"
+              onClick={onBrandClick}
+              aria-label={`${content.brand.shortName} — go to homepage`}
+              className="flex items-center gap-2.5 rounded-xl transition-opacity hover:opacity-80"
+            >
               <img
                 src={content.brand.logo}
                 alt={`${content.brand.shortName} ${content.brand.name} logo`}
@@ -23,7 +39,7 @@ export function SiteFooter() {
                   {content.brand.name}
                 </p>
               </div>
-            </div>
+            </Link>
             <p className="mt-6 text-sm leading-relaxed text-white/70">
               {content.brand.footerDescription}
             </p>
