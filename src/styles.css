@@ -260,6 +260,36 @@
   background-size: 1200px 600px;
 }
 
+/*
+ * Cinematic showcase: a slow drift across the frame so a still photograph
+ * reads as motion, the way a screen saver does. Paused entirely for anyone
+ * who asked for reduced motion.
+ */
+@keyframes slow-drift {
+  from {
+    transform: scale(1.06) translate3d(-1%, -0.6%, 0);
+  }
+  to {
+    transform: scale(1.14) translate3d(1%, 0.6%, 0);
+  }
+}
+
+@utility cinematic-pan {
+  animation: slow-drift 18s ease-in-out infinite alternate;
+  will-change: transform;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transform: none;
+  }
+}
+
+/* Full-bleed band that escapes the page gutter without causing overflow. */
+@utility full-bleed {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  max-width: 100vw;
+}
+
 /* Soft hairline between two same-coloured sections. */
 @utility section-hairline {
   border-top: 1px solid var(--border);
