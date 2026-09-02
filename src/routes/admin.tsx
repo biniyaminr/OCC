@@ -10,6 +10,7 @@ import {
   Layers3,
   LayoutDashboard,
   Loader2,
+  LogOut,
   Mail,
   MailOpen,
   Package,
@@ -21,6 +22,8 @@ import {
   Upload,
 } from "lucide-react";
 import { formatReceived, replyHref, useInbox, type InboxMessage } from "@/lib/inbox";
+import { AdminGate } from "@/components/occ/AdminGate";
+import { signOut } from "@/lib/supabase/auth";
 import { categories } from "@/data/products";
 import {
   defaultSiteContent,
@@ -37,8 +40,12 @@ export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [{ title: "Content Studio — OCC" }, { name: "robots", content: "noindex, nofollow" }],
   }),
-  component: AdminPage,
+  component: AdminRoute,
 });
+
+function AdminRoute() {
+  return <AdminGate>{(auth) => <AdminPage email={auth.email} />}</AdminGate>;
+}
 
 type AdminView = "home" | "messages" | "categories" | "products" | "partners";
 
@@ -50,7 +57,7 @@ const navigation: { id: AdminView; label: string; icon: typeof LayoutDashboard }
   { id: "partners", label: "Partners", icon: Handshake },
 ];
 
-function AdminPage() {
+function AdminPage({ email }: { email: string | null }) {
   const { content, setContent, resetContent, ready, saveState, saveError } = useSiteContent();
   const inbox = useInbox();
   const [view, setView] = useState<AdminView>("home");
@@ -132,6 +139,15 @@ function AdminPage() {
             >
               View website <ExternalLink className="h-3.5 w-3.5" />
             </Link>
+            <button
+              type="button"
+              onClick={() => void signOut()}
+              title={email ? `Signed in as ${email}` : undefined}
+              className="inline-flex items-center gap-2 rounded-xl border border-[#d5ddd6] bg-white px-3.5 py-2 text-xs font-semibold text-[#58655b] shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#a5b1a7] hover:shadow"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Sign out</span>
+            </button>
           </div>
         </div>
       </header>

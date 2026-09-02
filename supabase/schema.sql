@@ -1,12 +1,14 @@
--- OCC schema. Run in the Supabase SQL editor (Dashboard -> SQL -> New query).
+-- ===========================================================================
+-- OCC — website database schema
+-- Run in the Supabase dashboard: SQL Editor -> New query -> paste -> Run.
+-- Safe to re-run; every statement is idempotent.
 --
--- Shapes mirror src/data/products.ts and src/lib/site-content.tsx so the
--- existing content maps across without reshaping it.
---
--- SECURITY NOTE: the publishable key ships inside the browser bundle and this
--- repository is public. Row-level security is therefore the only thing
--- separating "anyone may read the catalog" from "anyone may rewrite it".
--- Every table below enables RLS.
+-- SECURITY MODEL
+--   The publishable key ships inside the browser bundle and this repository is
+--   public, so row-level security is the real boundary — not the admin UI.
+--   "Signed in" is NOT enough to write: a writer must appear in `admins`,
+--   because Supabase email signup lets anyone create an account.
+-- ===========================================================================
 
 -- ---------------------------------------------------------------- categories
 create table if not exists categories (
@@ -57,8 +59,8 @@ create table if not exists partners (
 );
 
 -- -------------------------------------------------------------- site_content
--- Brand block and the seven homepage sections, keyed exactly as the studio
--- addresses them: 'brand', 'home.hero', 'home.about', 'home.products', ...
+-- Brand block and the homepage sections, keyed as the studio addresses them:
+-- 'brand', 'home.hero', 'home.about', 'home.products', 'home.contact', ...
 create table if not exists site_content (
   key        text primary key,
   value      jsonb       not null,
@@ -80,14 +82,51 @@ create table if not exists messages (
 );
 create index if not exists messages_created_idx on messages (created_at desc);
 
+-- ======================================================== admin allowlist ===
+-- Being authenticated only proves someone signed up. Membership here is what
+-- grants write access, so a stranger creating an account gains nothing.
+create table if not exists admins (
+  user_id    uuid primary key references auth.users(id) on delete cascade,
+  email      text,
+  created_at timestamptz not null default now()
+);
+
+-- SECURITY DEFINER so the check itself is not blocked by RLS on `admins`.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from public.admins where user_id = auth.uid());
+$$;
+
+revoke all on function public.is_admin() from public;
+grant execute on function public.is_admin() to anon, authenticated;
+
 -- =============================================================== row security
 alter table categories   enable row level security;
 alter table products     enable row level security;
 alter table partners     enable row level security;
 alter table site_content enable row level security;
 alter table messages     enable row level security;
+alter table admins       enable row level security;
 
--- Public site: anyone may read live records. Nobody anonymous may write.
+drop policy if exists "public reads live categories"      on categories;
+drop policy if exists "public reads live products"        on products;
+drop policy if exists "public reads live partners"        on partners;
+drop policy if exists "public reads site content"         on site_content;
+drop policy if exists "authenticated manages categories"  on categories;
+drop policy if exists "authenticated manages products"    on products;
+drop policy if exists "authenticated manages partners"    on partners;
+drop policy if exists "authenticated manages site content" on site_content;
+drop policy if exists "anyone submits an inquiry"         on messages;
+drop policy if exists "only the studio reads inquiries"   on messages;
+drop policy if exists "only the studio updates inquiries" on messages;
+drop policy if exists "only the studio deletes inquiries" on messages;
+
+-- Public site: anyone may read live rows.
 create policy "public reads live categories" on categories
   for select using (not deleted);
 create policy "public reads live products" on products
@@ -97,39 +136,67 @@ create policy "public reads live partners" on partners
 create policy "public reads site content" on site_content
   for select using (true);
 
--- Studio: signed-in users manage everything.
-create policy "authenticated manages categories" on categories
-  for all to authenticated using (true) with check (true);
-create policy "authenticated manages products" on products
-  for all to authenticated using (true) with check (true);
-create policy "authenticated manages partners" on partners
-  for all to authenticated using (true) with check (true);
-create policy "authenticated manages site content" on site_content
-  for all to authenticated using (true) with check (true);
+-- Studio: only allowlisted admins may write.
+create policy "admins manage categories" on categories
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy "admins manage products" on products
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy "admins manage partners" on partners
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy "admins manage site content" on site_content
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
--- Messages are deliberately asymmetric: a buyer may submit an inquiry but
--- must never be able to read anyone else's. This is what makes inquiries
--- actually reach OCC instead of dying in the visitor's own browser.
+-- Messages are asymmetric on purpose: a buyer submits but can never read
+-- anyone's inquiries — including their own.
 create policy "anyone submits an inquiry" on messages
   for insert to anon, authenticated with check (true);
-create policy "only the studio reads inquiries" on messages
-  for select to authenticated using (true);
-create policy "only the studio updates inquiries" on messages
-  for update to authenticated using (true) with check (true);
-create policy "only the studio deletes inquiries" on messages
-  for delete to authenticated using (true);
+create policy "admins read inquiries" on messages
+  for select to authenticated using (public.is_admin());
+create policy "admins update inquiries" on messages
+  for update to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy "admins delete inquiries" on messages
+  for delete to authenticated using (public.is_admin());
 
--- ================================================================== storage
--- Product and partner photography. Public read, authenticated write.
+-- An admin may confirm their own membership (drives the studio's gate).
+create policy "admins read own row" on admins
+  for select to authenticated using (user_id = auth.uid());
+
+-- =================================================================== storage
 insert into storage.buckets (id, name, public)
 values ('media', 'media', true)
 on conflict (id) do nothing;
 
+drop policy if exists "public reads media"        on storage.objects;
+drop policy if exists "authenticated writes media" on storage.objects;
+drop policy if exists "authenticated updates media" on storage.objects;
+drop policy if exists "authenticated deletes media" on storage.objects;
+
 create policy "public reads media" on storage.objects
   for select using (bucket_id = 'media');
-create policy "authenticated writes media" on storage.objects
-  for insert to authenticated with check (bucket_id = 'media');
-create policy "authenticated updates media" on storage.objects
-  for update to authenticated using (bucket_id = 'media');
-create policy "authenticated deletes media" on storage.objects
-  for delete to authenticated using (bucket_id = 'media');
+create policy "admins write media" on storage.objects
+  for insert to authenticated with check (bucket_id = 'media' and public.is_admin());
+create policy "admins update media" on storage.objects
+  for update to authenticated using (bucket_id = 'media' and public.is_admin());
+create policy "admins delete media" on storage.objects
+  for delete to authenticated using (bucket_id = 'media' and public.is_admin());
+
+-- ===========================================================================
+-- AFTER RUNNING THIS
+--
+-- 1. Create your admin user:
+--      Dashboard -> Authentication -> Users -> Add user
+--      Enter your email, set a password, tick "Auto Confirm User".
+--
+-- 2. Grant it admin rights (replace the address with the one you just used):
+--
+--      insert into public.admins (user_id, email)
+--      select id, email from auth.users where email = 'you@example.com'
+--      on conflict (user_id) do nothing;
+--
+-- 3. Turn OFF public signup, so nobody else can create an account:
+--      Dashboard -> Authentication -> Sign In / Providers -> Email
+--      -> disable "Allow new users to sign up".
+--
+-- 4. Confirm it worked — this must return true while signed in as you:
+--      select public.is_admin();
+-- ===========================================================================
