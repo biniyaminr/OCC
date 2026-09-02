@@ -185,10 +185,22 @@
   max-width: 62ch;
 }
 
+/*
+ * Two vertical rhythms only. Full editorial sections use `section-y`; compact
+ * connective bands (the trust bar, "At a glance") use `section-y-sm`. Anything
+ * hand-rolled drifts and the page stops feeling composed.
+ */
 @utility section-y {
   padding-block: 5rem;
   @media (min-width: 768px) {
     padding-block: 7.5rem;
+  }
+}
+
+@utility section-y-sm {
+  padding-block: 3rem;
+  @media (min-width: 768px) {
+    padding-block: 4rem;
   }
 }
 

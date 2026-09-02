@@ -12,7 +12,7 @@ export function AboutSection() {
   const { content } = useSiteContent();
   const about = content.home.about;
   return (
-    <section id="about" className="section-y relative bg-background">
+    <section id="about" className="section-hairline section-y relative bg-background">
       <div className="container-x">
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] lg:gap-20">
           <Reveal>

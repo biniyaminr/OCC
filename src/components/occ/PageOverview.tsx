@@ -38,7 +38,7 @@ export function PageOverview() {
       aria-labelledby="overview-heading"
       className="on-dark surface-dark border-b border-white/10 text-white"
     >
-      <div className="container-x py-12 md:py-16">
+      <div className="container-x section-y-sm">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,2.28fr)] lg:gap-12">
           <div>
             <span className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-gold">

@@ -40,12 +40,12 @@ export function ProductCategories() {
     .filter((cat) => cat.products.length > 0);
 
   return (
-    <section id="products" className="relative scroll-mt-24 bg-beige py-16 md:py-24">
+    <section id="products" className="section-y relative scroll-mt-24 bg-beige">
       <div className="container-x">
         <Reveal>
           <div className="max-w-3xl">
             <span className="eyebrow">{section.eyebrow}</span>
-            <h2 className="mt-4 text-[clamp(1.65rem,1.05rem+2.1vw,3rem)] font-medium leading-[1.12] text-foreground">
+            <h2 className="mt-4 text-h2 font-medium leading-[1.12] text-foreground">
               <span className="block">{section.title}</span>
               <span className="block italic text-coffee">{section.accent}</span>
             </h2>

@@ -41,18 +41,16 @@ export function WhyOCC() {
   return (
     <section
       id="why-occ"
-      className="relative overflow-hidden bg-stone-950 py-24 md:py-32 text-stone-100"
+      className="on-dark surface-dark section-y relative overflow-hidden text-white"
     >
       <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:32px_32px]" />
       <div className="container-x relative">
         <Reveal>
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-semibold uppercase tracking-[0.24em] text-primary-strong">
-              {section.eyebrow}
-            </span>
-            <h2 className="mt-4 text-4xl font-medium md:text-5xl">
+            <span className="eyebrow-on-dark">{section.eyebrow}</span>
+            <h2 className="mt-4 text-h2 font-medium leading-[1.1]">
               {section.title}
-              <span className="italic text-primary-strong"> {section.accent}</span>
+              <span className="italic text-gold"> {section.accent}</span>
             </h2>
           </div>
         </Reveal>
@@ -63,14 +61,12 @@ export function WhyOCC() {
               f.title === "Trusted sourcing partner" || f.title === "Export-ready documentation";
             return (
               <Reveal key={f.title} delay={i * 80} className={wide ? "md:col-span-2" : ""}>
-                <div className="group h-full rounded-3xl border border-stone-800 bg-stone-900/60 p-8 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50">
-                  <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary-strong transition-transform duration-300 group-hover:scale-110">
+                <div className="group h-full rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50">
+                  <span className="grid h-12 w-12 place-items-center rounded-full bg-gold/12 text-gold transition-transform duration-300 group-hover:scale-110">
                     <f.icon className="h-6 w-6" />
                   </span>
-                  <h3 className="mt-6 font-display text-2xl font-medium text-stone-100">
-                    {f.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-stone-400">{f.text}</p>
+                  <h3 className="mt-6 font-display text-2xl font-medium text-white">{f.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-white/65">{f.text}</p>
                 </div>
               </Reveal>
             );
