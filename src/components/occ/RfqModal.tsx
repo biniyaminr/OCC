@@ -27,12 +27,12 @@ export function RfqModal({
 
   if (!open) return null;
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitting(true);
     const data = new FormData(e.currentTarget);
     const get = (field: string) => String(data.get(field) ?? "").trim();
-    const saved = addMessage({
+    const saved = await addMessage({
       kind: "rfq",
       subject: get("commodity") || commodity,
       name: get("name"),
@@ -50,17 +50,15 @@ export function RfqModal({
         { label: "Additional notes", value: get("notes") },
       ],
     });
-    setTimeout(() => {
-      setSubmitting(false);
-      if (saved) {
-        toast.success("RFQ submitted", {
-          description: `Our sourcing team will respond on ${commodity} within one business day.`,
-        });
-      } else {
-        toast.error("RFQ sent, but it could not be stored in this browser.");
-      }
-      onClose();
-    }, 700);
+    setSubmitting(false);
+    if (saved) {
+      toast.success("RFQ submitted", {
+        description: `Our sourcing team will respond on ${commodity} within one business day.`,
+      });
+    } else {
+      toast.error("RFQ could not be saved. Please email OCC directly.");
+    }
+    onClose();
   }
 
   const field =

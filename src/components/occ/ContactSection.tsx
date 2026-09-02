@@ -28,7 +28,7 @@ export function ContactSection() {
     if (p && productOptions.includes(p)) setPreselected(p);
   }, [productOptions]);
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
@@ -57,7 +57,7 @@ export function ContactSection() {
 
     setSubmitting(true);
     const get = (field: string) => String(data.get(field) ?? "").trim();
-    const saved = addMessage({
+    const saved = await addMessage({
       kind: "contact",
       subject: get("product"),
       name: get("name"),
@@ -74,14 +74,12 @@ export function ContactSection() {
         { label: "Message", value: get("message") },
       ],
     });
-    setTimeout(() => {
-      setSubmitting(false);
-      setSent(true);
-      form.reset();
-      if (!saved) {
-        toast.error("Inquiry sent, but it could not be stored in this browser.");
-      }
-    }, 700);
+    setSubmitting(false);
+    setSent(true);
+    form.reset();
+    if (!saved) {
+      toast.error("Inquiry could not be saved. Please email OCC directly.");
+    }
   }
 
   return (

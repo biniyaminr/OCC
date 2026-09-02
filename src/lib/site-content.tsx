@@ -14,6 +14,8 @@ import heroImage from "@/assets/coffee-farm-hero.jpg";
 import aboutImage from "@/assets/coffee-producer-570.webp";
 import { allProducts, categories, type Category, type Product } from "@/data/products";
 import { partners, type Partner } from "@/data/partners";
+import { createClient } from "@/lib/supabase/client";
+import { hasSupabaseCredentials } from "@/lib/supabase/env";
 import {
   dataUrlToBlob,
   deleteImages,
@@ -27,6 +29,10 @@ import {
 } from "@/lib/image-store";
 
 const STORAGE_KEY = "occ-site-content-v2";
+const SUPABASE_SYNC_KEY = "occ-site-content-supabase-sync";
+const SUPABASE_SYNC_EVENT = "occ-site-content-supabase-change";
+const SITE_CONTENT_KEY = "site";
+const MEDIA_BUCKET = "media";
 
 export type ManagedProductContent = {
   name: string;
@@ -312,6 +318,10 @@ function mergeDefaults<T>(defaults: T, stored: unknown): T {
   return result as T;
 }
 
+function normalizeStoredContent(stored: unknown): SiteContent {
+  return purgePlaceholders(mergeDefaults(defaultSiteContent, stored));
+}
+
 /** Rewrites every string in the content tree, used to swap image references. */
 function mapStrings<T>(value: T, replace: (value: string) => string): T {
   if (typeof value === "string") return replace(value) as unknown as T;
@@ -336,21 +346,162 @@ function collectStrings(value: unknown, found: Set<string> = new Set()) {
   return found;
 }
 
+function announceSupabaseContent(content: SiteContent) {
+  try {
+    const payload = JSON.stringify({ at: Date.now(), content });
+    window.localStorage.setItem(SUPABASE_SYNC_KEY, payload);
+    window.dispatchEvent(new CustomEvent(SUPABASE_SYNC_EVENT, { detail: payload }));
+  } catch {
+    // Cross-tab live preview is best effort; Supabase remains the source of truth.
+  }
+}
+
+function parseSupabaseContentPayload(raw: string | unknown) {
+  const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+  return normalizeStoredContent((parsed as { content?: unknown }).content);
+}
+
+function fileExtension(type: string) {
+  if (type === "image/png") return "png";
+  if (type === "image/webp") return "webp";
+  return "jpg";
+}
+
+async function uploadSupabaseImages(content: SiteContent): Promise<SiteContent> {
+  const uploads = [...collectStrings(content)].filter(isDataImage);
+  if (uploads.length === 0) return content;
+
+  const supabase = createClient();
+  const urlByData = new Map<string, string>();
+
+  for (const dataUrl of uploads) {
+    if (urlByData.has(dataUrl)) continue;
+    const blob = await dataUrlToBlob(dataUrl);
+    const id =
+      globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const path = `content/${id}.${fileExtension(blob.type)}`;
+    const { error } = await supabase.storage.from(MEDIA_BUCKET).upload(path, blob, {
+      contentType: blob.type || "image/jpeg",
+      upsert: false,
+    });
+    if (error) throw error;
+    const { data } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path);
+    urlByData.set(dataUrl, data.publicUrl);
+  }
+
+  return mapStrings(content, (value) => urlByData.get(value) ?? value);
+}
+
+async function loadSupabaseContent(): Promise<SiteContent | null> {
+  if (!hasSupabaseCredentials()) return null;
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("site_content")
+    .select("value")
+    .eq("key", SITE_CONTENT_KEY)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.value ? normalizeStoredContent(data.value) : null;
+}
+
+async function persistNormalizedTables(content: SiteContent) {
+  const supabase = createClient();
+  const now = new Date().toISOString();
+
+  const categoryRows = Object.entries(content.categories).map(([id, category], index) => ({
+    id,
+    title: category.title,
+    blurb: category.blurb,
+    icon: category.icon || "📦",
+    sort_order: index,
+    deleted: Boolean(category.deleted),
+    updated_at: now,
+  }));
+
+  const productRows = Object.entries(content.products).map(([slug, product], index) => ({
+    slug,
+    category_id: product.categoryId || null,
+    name: product.name,
+    tagline: product.tagline,
+    overview: product.overview,
+    image: product.image || null,
+    gallery: product.gallery ?? [],
+    regions: product.regions ?? [],
+    sort_order: index,
+    deleted: Boolean(product.deleted),
+    updated_at: now,
+  }));
+
+  const partnerRows = Object.entries(content.partners).map(([slug, partner], index) => ({
+    slug,
+    name: partner.name,
+    category: partner.category,
+    url: partner.url,
+    tagline: partner.tagline,
+    long_description: partner.longDescription,
+    image: partner.image || null,
+    sort_order: index,
+    deleted: Boolean(partner.deleted),
+    updated_at: now,
+  }));
+
+  if (categoryRows.length) {
+    const { error } = await supabase.from("categories").upsert(categoryRows, { onConflict: "id" });
+    if (error) throw error;
+  }
+
+  const results = await Promise.all([
+    productRows.length
+      ? supabase.from("products").upsert(productRows, { onConflict: "slug" })
+      : Promise.resolve({ error: null }),
+    partnerRows.length
+      ? supabase.from("partners").upsert(partnerRows, { onConflict: "slug" })
+      : Promise.resolve({ error: null }),
+  ]);
+
+  const error = results.find((result) => result.error)?.error;
+  if (error) throw error;
+}
+
+async function persistSupabaseContent(content: SiteContent): Promise<SiteContent> {
+  const supabase = createClient();
+  const prepared = await uploadSupabaseImages(content);
+  await persistNormalizedTables(prepared);
+  const { error } = await supabase.from("site_content").upsert(
+    {
+      key: SITE_CONTENT_KEY,
+      value: prepared,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "key" },
+  );
+  if (error) throw error;
+  return prepared;
+}
+
 export function SiteContentProvider({ children }: { children: ReactNode }) {
-  const [content, setContent] = useState(defaultSiteContent);
+  const [content, setContentState] = useState(defaultSiteContent);
   const [ready, setReady] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [saveError, setSaveError] = useState("");
+  const savedVersion = useRef(0);
+  const dirtyVersion = useRef(0);
   // Maps `idb:<id>` references to the object URL used while the app is running.
   const urlByRef = useRef(new Map<string, string>());
   const refByUrl = useRef(new Map<string, string>());
   // Only images uploaded in this tab are ever garbage collected, so a second
   // tab's upload can never be deleted out from under it.
   const ownedIds = useRef(new Set<string>());
+  const useSupabase = hasSupabaseCredentials();
+
+  const setContent = useCallback((next: SiteContent) => {
+    dirtyVersion.current += 1;
+    setContentState(next);
+  }, []);
 
   /** Turns stored `idb:` references into object URLs the browser can render. */
   const hydrate = useCallback(async (raw: string) => {
-    const stored = purgePlaceholders(mergeDefaults(defaultSiteContent, JSON.parse(raw)));
+    const stored = normalizeStoredContent(JSON.parse(raw));
     const refs = [...collectStrings(stored)].filter(isImageRef);
     await Promise.all(
       refs.map(async (ref) => {
@@ -375,10 +526,15 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     const load = async () => {
       try {
-        const raw = window.localStorage.getItem(STORAGE_KEY);
+        const remote = await loadSupabaseContent();
+        if (remote) {
+          if (!cancelled) setContentState(remote);
+          return;
+        }
+        const raw = useSupabase ? null : window.localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const restored = await hydrate(raw);
-          if (!cancelled) setContent(restored);
+          if (!cancelled) setContentState(restored);
         }
       } catch {
         // Keep defaults if browser storage is unavailable or malformed.
@@ -394,12 +550,25 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!ready) return;
+    if (dirtyVersion.current === savedVersion.current) return;
     let cancelled = false;
+    const versionToSave = dirtyVersion.current;
 
     const persist = async () => {
       setSaveState("saving");
       let toStore = content;
       try {
+        if (useSupabase) {
+          const stored = await persistSupabaseContent(content);
+          if (cancelled) return;
+          setSaveError("");
+          setSaveState("saved");
+          savedVersion.current = Math.max(savedVersion.current, versionToSave);
+          if (stored !== content) setContentState(stored);
+          announceSupabaseContent(stored);
+          return;
+        }
+
         // Newly uploaded images arrive as data URLs; move them into IndexedDB
         // so the JSON kept in localStorage stays small.
         const uploads = [...collectStrings(content)].filter(isDataImage);
@@ -441,9 +610,10 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
         setSaveError("");
         setSaveState("saved");
+        savedVersion.current = Math.max(savedVersion.current, versionToSave);
         // Swap the in-memory data URLs for object URLs so the next save is cheap.
         if (refByDataUrl.size > 0) {
-          setContent((current) =>
+          setContentState((current) =>
             mapStrings(current, (value) => {
               const ref = refByDataUrl.get(value);
               return ref ? (urlByRef.current.get(ref) ?? value) : value;
@@ -452,11 +622,21 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         if (cancelled) return;
+        if (useSupabase) {
+          setSaveError(
+            error instanceof Error
+              ? `Database save failed: ${error.message}`
+              : "Database save failed.",
+          );
+          setSaveState("error");
+          return;
+        }
         // IndexedDB may be blocked (private mode); fall back to inline data URLs.
         try {
           window.localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
           setSaveError("");
           setSaveState("saved");
+          savedVersion.current = Math.max(savedVersion.current, versionToSave);
         } catch {
           setSaveError(
             error instanceof Error && error.name === "QuotaExceededError"
@@ -476,21 +656,44 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
   }, [content, ready]);
 
   useEffect(() => {
+    const syncFromPayload = (raw: string | unknown) => {
+      try {
+        setContentState(parseSupabaseContentPayload(raw));
+      } catch {
+        // Ignore malformed changes from another tab.
+      }
+    };
+
+    const syncSameTab = (event: Event) => {
+      if (!useSupabase) return;
+      syncFromPayload((event as CustomEvent).detail);
+    };
+
     const syncAcrossTabs = (event: StorageEvent) => {
+      if (useSupabase) {
+        if (event.key !== SUPABASE_SYNC_KEY || !event.newValue) return;
+        syncFromPayload(event.newValue);
+        return;
+      }
       if (event.key !== STORAGE_KEY || !event.newValue) return;
       void hydrate(event.newValue)
-        .then(setContent)
+        .then(setContentState)
         .catch(() => {
           // Ignore malformed changes from another tab.
         });
     };
     window.addEventListener("storage", syncAcrossTabs);
-    return () => window.removeEventListener("storage", syncAcrossTabs);
+    window.addEventListener(SUPABASE_SYNC_EVENT, syncSameTab);
+    return () => {
+      window.removeEventListener("storage", syncAcrossTabs);
+      window.removeEventListener(SUPABASE_SYNC_EVENT, syncSameTab);
+    };
   }, [hydrate]);
 
   /** Restores the shipped content and clears every uploaded image. */
   const resetContent = useCallback(() => {
     setContent(defaultSiteContent);
+    if (useSupabase) return;
     void (async () => {
       try {
         await deleteImages(await listImageIds());
@@ -531,11 +734,19 @@ export function useSiteContent() {
  * assigned it — including built-in products moved to a different group.
  */
 export function buildManagedCategories(content: SiteContent): Category[] {
-  const activeCategories = [
-    ...categories.filter((category) => !content.categories[category.id]?.deleted),
+  const activeCategories: Category[] = [
+    ...categories
+      .filter((category) => !content.categories[category.id]?.deleted)
+      .map((category) => ({ ...category, ...(content.categories[category.id] ?? {}) })),
     ...Object.entries(content.categories)
       .filter(([, category]) => category.custom && !category.deleted)
-      .map(([id, category]) => ({ id, ...category, products: [] })),
+      .map(([id, category]) => ({
+        id,
+        title: category.title,
+        blurb: category.blurb,
+        icon: category.icon,
+        products: [],
+      })),
   ];
   const grouped = new Map<string, Product[]>(activeCategories.map((category) => [category.id, []]));
   const fallbackId = activeCategories[0]?.id ?? categories[0]!.id;

@@ -22,7 +22,7 @@ import {
   Upload,
 } from "lucide-react";
 import { formatReceived, replyHref, useInbox, type InboxMessage } from "@/lib/inbox";
-import { AdminGate } from "@/components/occ/AdminGate";
+import { AdminGate } from "@/components/admin/AdminGate";
 import { signOut } from "@/lib/supabase/auth";
 import { categories } from "@/data/products";
 import {
@@ -184,10 +184,10 @@ function AdminPage({ email }: { email: string | null }) {
           </nav>
 
           <div className="mt-6 hidden rounded-2xl border border-white/10 bg-white/5 p-4 lg:block">
-            <p className="text-xs font-semibold text-white">Local content mode</p>
+            <p className="text-xs font-semibold text-white">Supabase content mode</p>
             <p className="mt-2 text-xs leading-relaxed text-white/55">
-              Edits are stored in this browser. Connect a database and secure login before using
-              this dashboard across multiple devices.
+              Edits save to Supabase and publish across devices once the schema and admin allowlist
+              are configured.
             </p>
           </div>
         </aside>
@@ -382,7 +382,7 @@ function HomeEditor({
 }
 
 function MessagesView({ inbox }: { inbox: ReturnType<typeof useInbox> }) {
-  const { messages, ready, setRead, remove, clearAll } = inbox;
+  const { messages, ready, databaseBacked, setRead, remove, clearAll } = inbox;
   const [selectedId, setSelectedId] = useState("");
   const [filter, setFilter] = useState<"all" | "unread" | "rfq" | "contact">("all");
 
@@ -406,15 +406,23 @@ function MessagesView({ inbox }: { inbox: ReturnType<typeof useInbox> }) {
 
   return (
     <div className="grid gap-6">
-      <div className="flex items-start gap-3 rounded-2xl border border-[#e8dcc0] bg-[#fdf8ec] p-4">
-        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#9a6e22]" />
-        <p className="text-xs leading-relaxed text-[#6b5a34]">
-          <strong className="font-semibold">These are browser-stored messages.</strong> A form
-          submitted on a buyer's own computer is saved in <em>their</em> browser, so it will never
-          reach this inbox. What you see here are submissions made from this browser. Connect the
-          forms to a server endpoint or email service before relying on this for real leads.
-        </p>
-      </div>
+      {databaseBacked ? (
+        <div className="flex items-start gap-3 rounded-2xl border border-[#dce8d7] bg-[#f3f8f1] p-4">
+          <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#1d4a2c]" />
+          <p className="text-xs leading-relaxed text-[#4f6254]">
+            <strong className="font-semibold">Messages are saved in Supabase.</strong> Contact forms
+            and quote requests submitted from the public site appear here for allowlisted admins.
+          </p>
+        </div>
+      ) : (
+        <div className="flex items-start gap-3 rounded-2xl border border-[#e8dcc0] bg-[#fdf8ec] p-4">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#9a6e22]" />
+          <p className="text-xs leading-relaxed text-[#6b5a34]">
+            <strong className="font-semibold">These are browser-stored messages.</strong> Configure
+            Supabase before relying on this inbox for real buyer inquiries.
+          </p>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
@@ -853,7 +861,7 @@ function ProductsEditor({ content, setContent }: EditorProps) {
         tagline: "Add a short product tagline.",
         overview: "Add the full product overview here.",
         image: "/favicon.png",
-        categoryId: categories[0]?.id ?? "coffee",
+        categoryId: managedCategories[0]?.id ?? categories[0]?.id ?? "coffee",
         regions: [],
         custom: true,
       },
@@ -1475,6 +1483,7 @@ async function readPickedImages(
 ): Promise<string[]> {
   const picked = Array.from(files ?? []);
   const ready: string[] = [];
+  if (picked.length === 0) return ready;
   for (const file of picked) {
     if (!file.type.startsWith("image/")) {
       onError("Choose a JPG, PNG or WebP image.");
@@ -1486,8 +1495,12 @@ async function readPickedImages(
     }
     try {
       ready.push(await compressImage(file));
-    } catch {
-      onError("This image could not be processed. Try a JPG or PNG file.");
+    } catch (error) {
+      onError(
+        error instanceof Error
+          ? `“${file.name}” could not be processed: ${error.message}`
+          : `“${file.name}” could not be processed. Try a JPG, PNG or WebP file.`,
+      );
     }
   }
   return ready;
@@ -1511,13 +1524,20 @@ function ImageField({
   compact?: boolean;
 }) {
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const preview = value;
 
   const onFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     event.target.value = "";
     setError("");
-    const [image] = await readPickedImages(files, setError);
-    if (image) onChange(image);
+    setBusy(true);
+    try {
+      const [image] = await readPickedImages(files, setError);
+      if (image) onChange(image);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -1531,9 +1551,9 @@ function ImageField({
         <div
           className={`overflow-hidden rounded-xl bg-[#e8ece7] ${compact ? "aspect-square" : "aspect-[4/3]"}`}
         >
-          {value ? (
+          {preview ? (
             <img
-              src={value}
+              src={preview}
               alt="Current content"
               onError={(event) => {
                 event.currentTarget.src = "/favicon.png";
@@ -1548,19 +1568,26 @@ function ImageField({
         </div>
         <div className="flex min-w-0 flex-col justify-center">
           <p className="text-xs leading-relaxed text-[#718076]">
-            Images are optimized before saving. JPG, PNG and WebP up to 8 MB.
+            JPG, PNG or WebP up to 8 MB. Resized to 1800px and converted to WebP on upload.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <label
               htmlFor={id}
-              className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#1d4a2c] px-3.5 py-2.5 text-xs font-semibold text-white hover:bg-[#173d24]"
+              className={`inline-flex cursor-pointer items-center gap-2 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-white transition-colors ${
+                busy ? "bg-[#4a6b55]" : "bg-[#1d4a2c] hover:bg-[#173d24]"
+              }`}
             >
-              <Upload className="h-3.5 w-3.5" /> Replace image
+              {busy ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Upload className="h-3.5 w-3.5" />
+              )}
+              {busy ? "Processing…" : value ? "Replace image" : "Choose image"}
             </label>
             <input
               id={id}
               type="file"
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
               onChange={onFile}
               className="sr-only"
             />
@@ -1609,15 +1636,25 @@ function GalleryField({
 }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pendingImages, setPendingImages] = useState<string[]>([]);
 
   const onFiles = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     event.target.value = "";
     setError("");
     setBusy(true);
-    const added = await readPickedImages(files, setError);
-    setBusy(false);
-    if (added.length > 0) onChange([...images, ...added]);
+    try {
+      const added = await readPickedImages(files, setError);
+      if (added.length > 0) setPendingImages((current) => [...current, ...added]);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const addPending = () => {
+    if (pendingImages.length === 0) return;
+    onChange([...images, ...pendingImages]);
+    setPendingImages([]);
   };
 
   const move = (index: number, direction: -1 | 1) => {
@@ -1635,27 +1672,56 @@ function GalleryField({
       </span>
       <div className="rounded-2xl border border-[#dce2db] bg-[#f7f9f6] p-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs leading-relaxed text-[#718076]">{description}</p>
+          <p className="text-xs leading-relaxed text-[#718076]">
+            {description} JPG, PNG or WebP up to 8 MB each.
+          </p>
           <label
             htmlFor={id}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#1d4a2c] px-3.5 py-2.5 text-xs font-semibold text-white hover:bg-[#173d24]"
+            className={`inline-flex cursor-pointer items-center gap-2 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-white transition-colors ${
+              busy ? "bg-[#4a6b55]" : "bg-[#1d4a2c] hover:bg-[#173d24]"
+            }`}
           >
             {busy ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <Plus className="h-3.5 w-3.5" />
             )}
-            Add pictures
+            {busy ? "Processing…" : "Add pictures"}
           </label>
           <input
             id={id}
             type="file"
             multiple
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
             onChange={onFiles}
             className="sr-only"
           />
         </div>
+
+        {pendingImages.length > 0 && (
+          <div className="mt-3 rounded-xl border border-[#e9d7a5] bg-[#fff9eb] p-3">
+            <p className="text-xs font-semibold text-[#7a5c14]">
+              {pendingImages.length} selected. Click Add selected to publish them to this product.
+            </p>
+            <ul className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
+              {pendingImages.map((image, index) => (
+                <li
+                  key={`${image.slice(0, 32)}-${index}`}
+                  className="overflow-hidden rounded-xl border border-[#ead9a7] bg-[#e8ece7]"
+                >
+                  <img
+                    src={image}
+                    alt={`Selected picture ${index + 1}`}
+                    onError={(event) => {
+                      event.currentTarget.src = "/favicon.png";
+                    }}
+                    className="aspect-square w-full object-cover"
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {images.length > 0 ? (
           <ul className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
@@ -1721,8 +1787,47 @@ function GalleryField({
   );
 }
 
+type DrawableImage = {
+  width: number;
+  height: number;
+  draw: (context: CanvasRenderingContext2D, width: number, height: number) => void;
+  close: () => void;
+};
+
+async function loadDrawableImage(file: File): Promise<DrawableImage> {
+  if ("createImageBitmap" in window) {
+    try {
+      const bitmap = await createImageBitmap(file);
+      return {
+        width: bitmap.width,
+        height: bitmap.height,
+        draw: (context, width, height) => context.drawImage(bitmap, 0, 0, width, height),
+        close: () => bitmap.close(),
+      };
+    } catch {
+      // Fall through to the HTMLImageElement path below.
+    }
+  }
+
+  const url = URL.createObjectURL(file);
+  const image = new Image();
+  image.decoding = "async";
+  const loaded = new Promise<void>((resolve, reject) => {
+    image.onload = () => resolve();
+    image.onerror = () => reject(new Error("the browser could not read this image"));
+  });
+  image.src = url;
+  await loaded;
+  return {
+    width: image.naturalWidth || image.width,
+    height: image.naturalHeight || image.height,
+    draw: (context, width, height) => context.drawImage(image, 0, 0, width, height),
+    close: () => URL.revokeObjectURL(url),
+  };
+}
+
 async function compressImage(file: File): Promise<string> {
-  const bitmap = await createImageBitmap(file);
+  const bitmap = await loadDrawableImage(file);
   const maxDimension = 1800;
   const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
@@ -1730,7 +1835,7 @@ async function compressImage(file: File): Promise<string> {
   canvas.height = Math.max(1, Math.round(bitmap.height * scale));
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Canvas is unavailable");
-  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.draw(context, canvas.width, canvas.height);
   bitmap.close();
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, "image/webp", 0.82),
