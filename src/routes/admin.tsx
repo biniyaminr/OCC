@@ -1478,10 +1478,10 @@ function TextField({
 
 /** Validates and compresses a picked file, reporting problems back to the UI. */
 async function readPickedImages(
-  files: FileList | null,
+  files: readonly File[],
   onError: (message: string) => void,
 ): Promise<string[]> {
-  const picked = Array.from(files ?? []);
+  const picked = [...files];
   const ready: string[] = [];
   if (picked.length === 0) return ready;
   for (const file of picked) {
@@ -1528,8 +1528,11 @@ function ImageField({
   const preview = value;
 
   const onFile = async (event: ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    event.target.value = "";
+    // Copy before clearing: `value = ""` empties the input's own FileList, and
+    // holding a reference to it would leave nothing to read by the time the
+    // async work runs. Clearing is what lets the same file be picked twice.
+    const files = Array.from(event.currentTarget.files ?? []);
+    event.currentTarget.value = "";
     setError("");
     setBusy(true);
     try {
@@ -1636,25 +1639,19 @@ function GalleryField({
 }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [pendingImages, setPendingImages] = useState<string[]>([]);
 
   const onFiles = async (event: ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    event.target.value = "";
+    // Same copy-before-clear as the single-image control.
+    const files = Array.from(event.currentTarget.files ?? []);
+    event.currentTarget.value = "";
     setError("");
     setBusy(true);
     try {
       const added = await readPickedImages(files, setError);
-      if (added.length > 0) setPendingImages((current) => [...current, ...added]);
+      if (added.length > 0) onChange([...images, ...added]);
     } finally {
       setBusy(false);
     }
-  };
-
-  const addPending = () => {
-    if (pendingImages.length === 0) return;
-    onChange([...images, ...pendingImages]);
-    setPendingImages([]);
   };
 
   const move = (index: number, direction: -1 | 1) => {
@@ -1697,31 +1694,6 @@ function GalleryField({
             className="sr-only"
           />
         </div>
-
-        {pendingImages.length > 0 && (
-          <div className="mt-3 rounded-xl border border-[#e9d7a5] bg-[#fff9eb] p-3">
-            <p className="text-xs font-semibold text-[#7a5c14]">
-              {pendingImages.length} selected. Click Add selected to publish them to this product.
-            </p>
-            <ul className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
-              {pendingImages.map((image, index) => (
-                <li
-                  key={`${image.slice(0, 32)}-${index}`}
-                  className="overflow-hidden rounded-xl border border-[#ead9a7] bg-[#e8ece7]"
-                >
-                  <img
-                    src={image}
-                    alt={`Selected picture ${index + 1}`}
-                    onError={(event) => {
-                      event.currentTarget.src = "/favicon.png";
-                    }}
-                    className="aspect-square w-full object-cover"
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
 
         {images.length > 0 ? (
           <ul className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
