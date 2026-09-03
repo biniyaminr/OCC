@@ -324,8 +324,21 @@ function mergeDefaults<T>(defaults: T, stored: unknown): T {
   return result as T;
 }
 
+/**
+ * Shapes stored JSON back into SiteContent.
+ *
+ * Deliberately does NOT drop placeholder records. A record created seconds ago
+ * is untouched by definition, so purging here would delete "New partner" the
+ * moment the save echoed back and the Create button would look broken.
+ * Abandoned records are cleaned up on a cold load instead — see `loadFresh`.
+ */
 function normalizeStoredContent(stored: unknown): SiteContent {
-  return purgePlaceholders(mergeDefaults(defaultSiteContent, stored));
+  return mergeDefaults(defaultSiteContent, stored);
+}
+
+/** Cold-start read: safe to discard records abandoned in an earlier session. */
+function loadFresh(stored: unknown): SiteContent {
+  return purgePlaceholders(normalizeStoredContent(stored));
 }
 
 /** Rewrites every string in the content tree, used to swap image references. */
@@ -407,7 +420,7 @@ async function loadSupabaseContent(): Promise<SiteContent | null> {
     .eq("key", SITE_CONTENT_KEY)
     .maybeSingle();
   if (error) throw error;
-  return data?.value ? normalizeStoredContent(data.value) : null;
+  return data?.value ? loadFresh(data.value) : null;
 }
 
 async function persistNormalizedTables(content: SiteContent) {
@@ -507,7 +520,7 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
 
   /** Turns stored `idb:` references into object URLs the browser can render. */
   const hydrate = useCallback(async (raw: string) => {
-    const stored = normalizeStoredContent(JSON.parse(raw));
+    const stored = loadFresh(JSON.parse(raw));
     const refs = [...collectStrings(stored)].filter(isImageRef);
     await Promise.all(
       refs.map(async (ref) => {
