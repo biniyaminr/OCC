@@ -1,30 +1,39 @@
 import { ArrowDownRight } from "lucide-react";
+import { useT, type UIKey } from "@/lib/i18n";
 
-const overviewItems = [
+type OverviewItem = {
+  number: string;
+  eyebrowKey: UIKey;
+  title: string;
+  description: string;
+  href: string;
+};
+
+const overviewItems: OverviewItem[] = [
   {
     number: "01",
-    eyebrow: "Portfolio",
+    eyebrowKey: "overview.portfolio",
     title: "Explore the harvest",
     description: "Coffee, oilseeds, pulses and cereals selected for export markets.",
     href: "#products",
   },
   {
     number: "02",
-    eyebrow: "Origin",
+    eyebrowKey: "overview.origin",
     title: "Understand Ethiopia",
     description: "See how altitude, soil and producer knowledge shape every crop.",
     href: "#why-ethiopia",
   },
   {
     number: "03",
-    eyebrow: "Assurance",
+    eyebrowKey: "overview.assurance",
     title: "Why buyers choose OCC",
     description: "Traceability, quality control and responsive coordination at origin.",
     href: "#why-occ",
   },
   {
     number: "04",
-    eyebrow: "Delivery",
+    eyebrowKey: "overview.delivery",
     title: "Follow the sourcing path",
     description: "From your first specification to export documents and shipment.",
     href: "#process",
@@ -32,6 +41,7 @@ const overviewItems = [
 ];
 
 export function PageOverview() {
+  const t = useT();
   return (
     <section
       id="overview"
@@ -42,7 +52,7 @@ export function PageOverview() {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,2.28fr)] lg:gap-12">
           <div>
             <span className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-gold">
-              At a glance
+              {t("overview.eyebrow")}
             </span>
             <h2
               id="overview-heading"
@@ -56,7 +66,7 @@ export function PageOverview() {
             </p>
           </div>
 
-          <nav aria-label="Homepage overview" className="grid sm:grid-cols-2">
+          <nav aria-label={t("overview.label")} className="grid sm:grid-cols-2">
             {overviewItems.map((item) => (
               <a
                 key={item.number}
@@ -73,7 +83,7 @@ export function PageOverview() {
                   />
                 </div>
                 <p className="mt-7 text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-gold">
-                  {item.eyebrow}
+                  {t(item.eyebrowKey)}
                 </p>
                 <h3 className="mt-2 font-display text-2xl text-white">{item.title}</h3>
                 <p className="mt-2 max-w-sm text-sm leading-relaxed text-white/60">

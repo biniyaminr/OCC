@@ -14,6 +14,12 @@ import heroImage from "@/assets/coffee-farm-hero.jpg";
 import aboutImage from "@/assets/coffee-producer-570.webp";
 import { allProducts, categories, type Category, type Product } from "@/data/products";
 import { partners, type Partner } from "@/data/partners";
+import {
+  localizeCategoryFields,
+  localizeHomeSection,
+  localizeProductFields,
+  useLanguage,
+} from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import { hasSupabaseCredentials } from "@/lib/supabase/env";
 import {
@@ -777,9 +783,36 @@ export function buildManagedCategories(content: SiteContent): Category[] {
   }));
 }
 
+/**
+ * Public-site view of the managed content, with Chinese overlaid when selected.
+ * The studio keeps using `useSiteContent` so it always edits the English source.
+ */
+export function useLocalizedContent(): SiteContent {
+  const { content } = useSiteContent();
+  const { language } = useLanguage();
+  return useMemo(() => {
+    if (language === "en") return content;
+    const home = Object.fromEntries(
+      Object.entries(content.home).map(([key, section]) => [
+        key,
+        localizeHomeSection(key as keyof SiteContent["home"], section, language),
+      ]),
+    ) as SiteContent["home"];
+    return { ...content, home };
+  }, [content, language]);
+}
+
 export function useManagedCategories(): Category[] {
   const { content } = useSiteContent();
-  return useMemo(() => buildManagedCategories(content), [content]);
+  const { language } = useLanguage();
+  return useMemo(() => {
+    const built = buildManagedCategories(content);
+    if (language === "en") return built;
+    return built.map((category) => ({
+      ...localizeCategoryFields(category, language),
+      products: category.products.map((product) => localizeProductFields(product, language)),
+    }));
+  }, [content, language]);
 }
 
 export type ResolvedProduct = Product & {

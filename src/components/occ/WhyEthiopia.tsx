@@ -1,6 +1,6 @@
 import { Coffee, Mountain, Sun, Award, Sprout, Ship, ShieldCheck } from "lucide-react";
 import { Reveal } from "./Reveal";
-import { useSiteContent } from "@/lib/site-content";
+import { useLocalizedContent } from "@/lib/site-content";
 
 const lead = [
   {
@@ -44,7 +44,7 @@ const facts = [
 ];
 
 export function WhyEthiopia() {
-  const { content } = useSiteContent();
+  const content = useLocalizedContent();
   const section = content.home.whyEthiopia;
   return (
     <section id="why-ethiopia" className="section-y relative overflow-hidden bg-background">

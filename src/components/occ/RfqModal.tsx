@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { X, Send } from "lucide-react";
 import { toast } from "sonner";
 import { addMessage } from "@/lib/inbox";
+import { useT } from "@/lib/i18n";
 
 export function RfqModal({
   open,
@@ -12,6 +13,7 @@ export function RfqModal({
   onClose: () => void;
   commodity: string;
 }) {
+  const t = useT();
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -52,8 +54,8 @@ export function RfqModal({
     });
     setSubmitting(false);
     if (saved) {
-      toast.success("RFQ submitted", {
-        description: `Our sourcing team will respond on ${commodity} within one business day.`,
+      toast.success(t("rfq.successTitle"), {
+        description: t("rfq.successBody", { name: commodity }),
       });
     } else {
       toast.error("RFQ could not be saved. Please email OCC directly.");
@@ -69,7 +71,7 @@ export function RfqModal({
     <div className="fixed inset-0 z-[100] grid place-items-center p-4">
       <button
         type="button"
-        aria-label="Close request for quote"
+        aria-label={t("rfq.close")}
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
       />
@@ -82,25 +84,22 @@ export function RfqModal({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t("action.close")}
           className="absolute right-5 top-5 grid h-9 w-9 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:text-foreground"
         >
           <X className="h-4 w-4" />
         </button>
 
         <span className="text-xs font-semibold uppercase tracking-[0.24em] text-primary-strong">
-          Request for Quote
+          {t("rfq.title")}
         </span>
         <h2 className="mt-3 font-display text-3xl font-medium text-foreground">{commodity}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Share your requirement and we'll respond with availability, specification and indicative
-          FOB Djibouti terms.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{t("rfq.intro")}</p>
 
         <form onSubmit={onSubmit} className="mt-7 grid gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label className={label} htmlFor="rfq-commodity">
-              Commodity
+              {t("rfq.commodity")}
             </label>
             <input
               id="rfq-commodity"
@@ -112,43 +111,43 @@ export function RfqModal({
           </div>
           <div>
             <label className={label} htmlFor="rfq-name">
-              Full name
+              {t("rfq.fullName")}
             </label>
             <input id="rfq-name" name="name" required className={field} />
           </div>
           <div>
             <label className={label} htmlFor="rfq-company">
-              Company
+              {t("rfq.company")}
             </label>
             <input id="rfq-company" name="company" required className={field} />
           </div>
           <div>
             <label className={label} htmlFor="rfq-email">
-              Business email
+              {t("rfq.businessEmail")}
             </label>
             <input id="rfq-email" name="email" type="email" required className={field} />
           </div>
           <div>
             <label className={label} htmlFor="rfq-country">
-              Destination country
+              {t("rfq.destinationCountry")}
             </label>
             <input id="rfq-country" name="country" required className={field} />
           </div>
           <div>
             <label className={label} htmlFor="rfq-volume">
-              Volume (MT)
+              {t("rfq.volume")}
             </label>
             <input
               id="rfq-volume"
               name="volume"
-              placeholder="e.g. 25 MT / month"
+              placeholder={t("rfq.volumeHint")}
               required
               className={field}
             />
           </div>
           <div>
             <label className={label} htmlFor="rfq-incoterm">
-              Incoterm
+              {t("rfq.incoterm")}
             </label>
             <select id="rfq-incoterm" name="incoterm" defaultValue="FOB Djibouti" className={field}>
               <option>FOB Djibouti</option>
@@ -159,18 +158,13 @@ export function RfqModal({
           </div>
           <div className="sm:col-span-2">
             <label className={label} htmlFor="rfq-grade">
-              Required grade / specification
+              {t("rfq.grade")}
             </label>
-            <input
-              id="rfq-grade"
-              name="grade"
-              placeholder="e.g. Grade 1, washed, screen 14 up"
-              className={field}
-            />
+            <input id="rfq-grade" name="grade" placeholder={t("rfq.gradeHint")} className={field} />
           </div>
           <div className="sm:col-span-2">
             <label className={label} htmlFor="rfq-notes">
-              Additional notes
+              {t("rfq.notes")}
             </label>
             <textarea id="rfq-notes" name="notes" rows={4} className={field} />
           </div>
@@ -180,7 +174,7 @@ export function RfqModal({
               disabled={submitting}
               className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-strong px-7 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-60"
             >
-              {submitting ? "Sending…" : "Submit RFQ"}
+              {submitting ? t("rfq.sending") : t("rfq.submit")}
               <Send className="h-4 w-4" />
             </button>
           </div>

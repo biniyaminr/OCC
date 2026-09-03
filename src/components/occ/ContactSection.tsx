@@ -3,15 +3,17 @@ import { CheckCircle2, Mail, MapPin, Phone, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Reveal } from "./Reveal";
 import { addMessage } from "@/lib/inbox";
-import { useManagedProducts, useSiteContent } from "@/lib/site-content";
+import { useT } from "@/lib/i18n";
+import { useManagedProducts, useLocalizedContent } from "@/lib/site-content";
 
 type Errors = Record<string, string>;
 
 export function ContactSection() {
-  const { content } = useSiteContent();
+  const content = useLocalizedContent();
+  const t = useT();
   const managedProducts = useManagedProducts();
   const productOptions = useMemo(
-    () => [...managedProducts.map((p) => p.name), "Multiple / Other"],
+    () => [...managedProducts.map((p) => p.name), t("contact.multipleOther")],
     [managedProducts],
   );
   const contact = content.home.contact;
@@ -35,18 +37,18 @@ export function ContactSection() {
     const next: Errors = {};
 
     const required: [string, string][] = [
-      ["name", "Please enter your full name."],
-      ["company", "Please enter your company name."],
-      ["email", "Please enter your business email."],
-      ["product", "Please select a product of interest."],
-      ["message", "Please describe your requirement."],
+      ["name", t("contact.errName")],
+      ["company", t("contact.errCompany")],
+      ["email", t("contact.errEmail")],
+      ["product", t("contact.errProduct")],
+      ["message", t("contact.errMessage")],
     ];
     required.forEach(([field, msg]) => {
       if (!String(data.get(field) ?? "").trim()) next[field] = msg;
     });
     const email = String(data.get("email") ?? "");
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      next["email"] = "Please enter a valid email address.";
+      next["email"] = t("contact.errEmailFormat");
     }
 
     setErrors(next);
@@ -110,7 +112,7 @@ export function ContactSection() {
                     value: contact.phone,
                     href: `tel:${contact.phone.replace(/[^+\d]/g, "")}`,
                   },
-                  { icon: MapPin, label: "Head office", value: contact.address },
+                  { icon: MapPin, label: t("contact.headOffice"), value: contact.address },
                 ].map((c) => (
                   <li key={c.label} className="flex items-start gap-4">
                     <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary-strong">
@@ -141,17 +143,16 @@ export function ContactSection() {
             {sent ? (
               <div className="flex h-full flex-col items-start justify-center rounded-3xl border border-border bg-card p-8 sm:p-12">
                 <CheckCircle2 aria-hidden className="h-10 w-10 text-primary-strong" />
-                <h3 className="mt-5 font-display text-h3 text-foreground">Inquiry received</h3>
-                <p className="mt-3 measure text-muted-foreground">
-                  Thank you. Our sourcing team will reply within one business day from
-                  plcoragon@gmail.com with availability and indicative terms.
-                </p>
+                <h3 className="mt-5 font-display text-h3 text-foreground">
+                  {t("contact.receivedTitle")}
+                </h3>
+                <p className="mt-3 measure text-muted-foreground">{t("contact.receivedBody")}</p>
                 <button
                   type="button"
                   onClick={() => setSent(false)}
                   className="mt-7 inline-flex min-h-[2.75rem] items-center rounded-full border border-border px-6 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary-strong"
                 >
-                  Send another inquiry
+                  {t("contact.sendAnother")}
                 </button>
               </div>
             ) : (
@@ -162,27 +163,27 @@ export function ContactSection() {
               >
                 <div className="grid gap-5 sm:grid-cols-2">
                   <Field
-                    label="Full name"
+                    label={t("contact.fullName")}
                     name="name"
                     autoComplete="name"
                     required
                     error={errors["name"]}
                   />
                   <Field
-                    label="Company name"
+                    label={t("contact.companyName")}
                     name="company"
                     autoComplete="organization"
                     required
                     error={errors["company"]}
                   />
                   <Field
-                    label="Country"
+                    label={t("contact.country")}
                     name="country"
                     autoComplete="country-name"
-                    hint="Optional"
+                    hint={t("contact.optional")}
                   />
                   <Field
-                    label="Business email"
+                    label={t("contact.businessEmail")}
                     name="email"
                     type="email"
                     autoComplete="email"
@@ -190,14 +191,14 @@ export function ContactSection() {
                     error={errors["email"]}
                   />
                   <Field
-                    label="Phone or WhatsApp"
+                    label={t("contact.phone")}
                     name="phone"
                     type="tel"
                     autoComplete="tel"
-                    hint="Optional"
+                    hint={t("contact.optional")}
                   />
                   <div>
-                    <FieldLabel htmlFor="product" label="Product of interest (coffee)" required />
+                    <FieldLabel htmlFor="product" label={t("contact.productOfInterest")} required />
                     <select
                       id="product"
                       name="product"
@@ -206,7 +207,7 @@ export function ContactSection() {
                       aria-invalid={Boolean(errors["product"])}
                       className={inputCls(Boolean(errors["product"]))}
                     >
-                      <option value="">Select a product…</option>
+                      <option value="">{t("contact.selectProduct")}</option>
                       {productOptions.map((p) => (
                         <option key={p} value={p}>
                           {p}
@@ -216,13 +217,13 @@ export function ContactSection() {
                     <ErrorText message={errors["product"]} />
                   </div>
                   <Field
-                    label="Estimated quantity"
+                    label={t("contact.quantity")}
                     name="quantity"
                     hint="Optional, e.g. 2 x 20ft"
                   />
-                  <Field label="Destination port" name="port" hint="Optional" />
+                  <Field label="Destination port" name="port" hint={t("contact.optional")} />
                   <div className="sm:col-span-2">
-                    <FieldLabel htmlFor="message" label="Message or specifications" required />
+                    <FieldLabel htmlFor="message" label={t("contact.message")} required />
                     <textarea
                       id="message"
                       name="message"

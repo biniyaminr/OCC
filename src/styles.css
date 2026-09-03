@@ -38,8 +38,12 @@
   --color-coffee: var(--coffee);
   --color-coffee-foreground: var(--coffee-foreground);
   --color-charcoal: var(--charcoal);
-  --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    "Cormorant Garamond", ui-serif, Georgia, "Songti SC", "Noto Serif SC", "Source Han Serif SC",
+    serif;
+  --font-sans:
+    "Manrope", ui-sans-serif, system-ui, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC",
+    "Microsoft YaHei", sans-serif;
   --text-eyebrow: 0.72rem;
   --text-display: clamp(2.5rem, 1.6rem + 3.4vw, 4.25rem);
   --text-h1: clamp(2.25rem, 1.5rem + 2.8vw, 3.75rem);

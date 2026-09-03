@@ -3,14 +3,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useSiteContent } from "@/lib/site-content";
 import { scrollToTop } from "@/lib/scroll";
+import { LANGUAGES, useLanguage, type UIKey } from "@/lib/i18n";
 
-const nav = [
-  { label: "About", href: "#about" },
-  { label: "Commodities", href: "#products" },
-  { label: "Why Ethiopia", href: "#why-ethiopia" },
-  { label: "Why OCC", href: "#why-occ" },
-  { label: "How It Works", href: "#process" },
-  { label: "Partners", href: "/partners", route: true },
+type NavItem = { key: UIKey; href: string; route?: boolean };
+
+const nav: NavItem[] = [
+  { key: "nav.about", href: "#about" },
+  { key: "nav.commodities", href: "#products" },
+  { key: "nav.whyEthiopia", href: "#why-ethiopia" },
+  { key: "nav.whyOcc", href: "#why-occ" },
+  { key: "nav.howItWorks", href: "#process" },
+  { key: "nav.partners", href: "/partners", route: true },
 ];
 
 const sectionIds = [...nav.filter((n) => !n.route).map((n) => n.href.replace("#", "")), "contact"];
@@ -21,6 +24,7 @@ function headerOffset() {
 
 export function SiteHeader() {
   const { content } = useSiteContent();
+  const { language, setLanguage, t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
@@ -167,7 +171,7 @@ export function SiteHeader() {
         <Link
           to="/"
           onClick={onBrandClick}
-          aria-label={`${content.brand.shortName} — go to homepage`}
+          aria-label={`${content.brand.shortName} — ${t("nav.home")}`}
           className="flex min-w-0 items-center gap-3 rounded-xl"
         >
           <img
@@ -196,7 +200,7 @@ export function SiteHeader() {
         </Link>
 
         <div className="flex items-center gap-2">
-          <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
+          <nav aria-label={t("nav.main")} className="hidden items-center gap-1 lg:flex">
             {nav.map((n) => {
               const active = isActive(n);
               const base = solid
@@ -212,7 +216,7 @@ export function SiteHeader() {
                   className={cls}
                   aria-current={active ? "page" : undefined}
                 >
-                  {n.label}
+                  {t(n.key)}
                 </Link>
               ) : (
                 <a
@@ -222,24 +226,55 @@ export function SiteHeader() {
                   className={cls}
                   aria-current={active ? "true" : undefined}
                 >
-                  {n.label}
+                  {t(n.key)}
                 </a>
               );
             })}
           </nav>
+
+          <div
+            role="group"
+            aria-label="Language"
+            className={`hidden items-center gap-0.5 rounded-full border p-0.5 lg:inline-flex ${
+              solid ? "border-border bg-card" : "border-white/25 bg-white/10 backdrop-blur"
+            }`}
+          >
+            {LANGUAGES.map((option) => {
+              const active = language === option.code;
+              return (
+                <button
+                  key={option.code}
+                  type="button"
+                  lang={option.code === "zh" ? "zh-CN" : "en"}
+                  onClick={() => setLanguage(option.code)}
+                  aria-label={option.aria}
+                  aria-pressed={active}
+                  className={`rounded-full px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                    active
+                      ? "bg-primary-strong text-primary-foreground"
+                      : solid
+                        ? "text-foreground/70 hover:text-primary-strong"
+                        : "text-white/80 hover:text-white"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
 
           <a
             href="/#contact"
             onClick={(e) => onAnchorClick(e, "#contact")}
             className="hidden min-h-[2.75rem] items-center rounded-full bg-primary-strong px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover lg:inline-flex"
           >
-            Contact OCC
+            {t("nav.contact")}
           </a>
 
           <button
             ref={closeButtonRef}
             type="button"
-            aria-label={open ? "Close menu" : "Open menu"}
+            aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
             aria-expanded={open}
             aria-controls="mobile-menu"
             onClick={() => setOpen((v) => !v)}
@@ -258,10 +293,10 @@ export function SiteHeader() {
           id="mobile-menu"
           role="dialog"
           aria-modal="true"
-          aria-label="Site menu"
+          aria-label={t("nav.menu")}
           className="fixed inset-x-0 bottom-0 top-[4.25rem] z-50 overflow-y-auto overscroll-contain border-t border-border bg-background shadow-2xl lg:hidden"
         >
-          <nav aria-label="Mobile" className="container-x flex flex-col gap-1 py-6">
+          <nav aria-label={t("nav.mobile")} className="container-x flex flex-col gap-1 py-6">
             {nav.map((n) => {
               const active = isActive(n);
               return n.route ? (
@@ -273,7 +308,7 @@ export function SiteHeader() {
                     active ? "bg-primary/12 text-primary-strong" : "text-foreground hover:bg-muted"
                   }`}
                 >
-                  {n.label}
+                  {t(n.key)}
                 </Link>
               ) : (
                 <a
@@ -287,7 +322,7 @@ export function SiteHeader() {
                     active ? "bg-primary/12 text-primary-strong" : "text-foreground hover:bg-muted"
                   }`}
                 >
-                  {n.label}
+                  {t(n.key)}
                 </a>
               );
             })}
@@ -299,8 +334,31 @@ export function SiteHeader() {
               }}
               className="mt-4 rounded-full bg-primary-strong px-5 py-4 text-center text-sm font-semibold text-primary-foreground"
             >
-              Contact OCC
+              {t("nav.contact")}
             </a>
+            <div role="group" aria-label="Language" className="mt-6 flex items-center gap-2">
+              {LANGUAGES.map((option) => {
+                const active = language === option.code;
+                return (
+                  <button
+                    key={option.code}
+                    type="button"
+                    lang={option.code === "zh" ? "zh-CN" : "en"}
+                    onClick={() => setLanguage(option.code)}
+                    aria-label={option.aria}
+                    aria-pressed={active}
+                    className={`flex-1 rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors ${
+                      active
+                        ? "border-primary bg-primary-strong text-primary-foreground"
+                        : "border-border text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+
             <p className="mt-8 text-sm text-muted-foreground">
               TM5 Building, 2nd Floor, Dembel Area, Addis Ababa, Ethiopia
             </p>

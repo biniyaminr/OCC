@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Reveal } from "./Reveal";
-import { useSiteContent } from "@/lib/site-content";
+import { useLocalizedContent } from "@/lib/site-content";
 
 const stats = [
   { k: "10+", v: "Product categories" },
@@ -9,7 +9,7 @@ const stats = [
 ];
 
 export function AboutSection() {
-  const { content } = useSiteContent();
+  const content = useLocalizedContent();
   const about = content.home.about;
   return (
     <section id="about" className="section-hairline section-y relative bg-background">

@@ -4,14 +4,16 @@ import { ArrowUpRight } from "lucide-react";
 import { getSpec, type Product } from "@/data/products";
 import { productAlt } from "@/lib/product-image";
 import { ProductImage } from "./ProductImage";
+import { useT } from "@/lib/i18n";
 import { Reveal } from "./Reveal";
-import { categoryTags, tagOf, useManagedCategories, useSiteContent } from "@/lib/site-content";
+import { categoryTags, tagOf, useManagedCategories, useLocalizedContent } from "@/lib/site-content";
 
 const numberWords = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight"];
 
 export function ProductCategories() {
+  const t = useT();
   const managedCategories = useManagedCategories();
-  const { content } = useSiteContent();
+  const content = useLocalizedContent();
   const section = content.home.products;
   const [activeTag, setActiveTag] = useState<string>("All");
 
@@ -59,7 +61,7 @@ export function ProductCategories() {
         <div className="sticky top-[4.25rem] z-20 -mx-5 mt-10 bg-beige/95 px-5 py-3 backdrop-blur md:-mx-10 md:px-10 lg:top-[4.875rem]">
           <div
             role="group"
-            aria-label="Filter products by category"
+            aria-label={t("catalog.filterLabel")}
             className="flex gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {allTags.map((tag) => {
@@ -131,6 +133,7 @@ function ProductCard({
   categoryId: string;
   categoryTitle: string;
 }) {
+  const t = useT();
   const specs = [
     getSpec(product, "Altitude"),
     getSpec(product, "Grades"),
@@ -181,7 +184,7 @@ function ProductCard({
           </ul>
         )}
         <span className="mt-auto flex items-center gap-2 pt-5 text-xs font-semibold uppercase tracking-[0.16em] text-primary-strong">
-          View details
+          {t("action.viewDetails")}
           <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
         </span>
       </div>

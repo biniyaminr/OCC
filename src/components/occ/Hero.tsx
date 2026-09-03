@@ -1,10 +1,10 @@
 import { ArrowRight } from "lucide-react";
 import { ProductSearchBar } from "./ProductSearchBar";
-import { useSiteContent } from "@/lib/site-content";
+import { useLocalizedContent } from "@/lib/site-content";
 import { onProductImageError, productImage } from "@/lib/product-image";
 
 export function Hero() {
-  const { content } = useSiteContent();
+  const content = useLocalizedContent();
   const hero = content.home.hero;
   return (
     <section className="on-dark relative flex min-h-[88svh] w-full items-center overflow-hidden bg-charcoal md:min-h-[90svh]">

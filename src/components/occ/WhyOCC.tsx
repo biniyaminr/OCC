@@ -1,6 +1,6 @@
 import { Handshake, BadgeCheck, Users, FileCheck, MessageSquare, Globe2 } from "lucide-react";
 import { Reveal } from "./Reveal";
-import { useSiteContent } from "@/lib/site-content";
+import { useLocalizedContent } from "@/lib/site-content";
 
 const features = [
   {
@@ -36,7 +36,7 @@ const features = [
 ];
 
 export function WhyOCC() {
-  const { content } = useSiteContent();
+  const content = useLocalizedContent();
   const section = content.home.whyOcc;
   return (
     <section

@@ -3,8 +3,10 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, X } from "lucide-react";
 import { useManagedProducts } from "@/lib/site-content";
 import { onProductImageError, productImage } from "@/lib/product-image";
+import { useT } from "@/lib/i18n";
 
 export function ProductSearchBar() {
+  const t = useT();
   const navigate = useNavigate({ from: "/" });
   const allProducts = useManagedProducts();
   const [query, setQuery] = useState("");
@@ -98,11 +100,9 @@ export function ProductSearchBar() {
           }}
           onFocus={() => query.trim() && setOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder={
-            compact ? "Search products or origins" : "Search products, origins, or categories..."
-          }
+          placeholder={compact ? t("search.placeholderShort") : t("search.placeholder")}
           className="h-14 w-full rounded-full border border-white/30 bg-white/95 pl-12 pr-11 text-[0.95rem] text-foreground shadow-lg backdrop-blur transition-all placeholder:text-muted-foreground/70 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 sm:pl-14 sm:pr-12 sm:text-base"
-          aria-label="Search products"
+          aria-label={t("search.label")}
           aria-autocomplete="list"
           aria-controls={open ? "search-results" : undefined}
           aria-expanded={open}
@@ -116,7 +116,7 @@ export function ProductSearchBar() {
               inputRef.current?.focus();
             }}
             className="absolute right-4 grid h-6 w-6 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:right-5"
-            aria-label="Clear search"
+            aria-label={t("search.clear")}
           >
             <X className="h-4 w-4" />
           </button>
@@ -158,7 +158,9 @@ export function ProductSearchBar() {
                         <span className="text-xs text-muted-foreground">{p.categoryTitle}</span>
                       </div>
                     </div>
-                    <span className="text-xs font-medium text-primary-strong">View</span>
+                    <span className="text-xs font-medium text-primary-strong">
+                      {t("search.view")}
+                    </span>
                   </Link>
                 </li>
               ))}

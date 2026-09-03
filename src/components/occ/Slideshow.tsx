@@ -14,6 +14,7 @@ import sorghum from "@/assets/Sorghum.jpg";
 import corn from "@/assets/Corn.jpg";
 import { useSiteContent } from "@/lib/site-content";
 import { onProductImageError, productImage } from "@/lib/product-image";
+import { useT } from "@/lib/i18n";
 
 type Slide = {
   image: string;
@@ -114,6 +115,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
 const HOLD_MS = 6500;
 
 export function Slideshow() {
+  const t = useT();
   const { content } = useSiteContent();
   const [i, setI] = useState(0);
   const [hovering, setHovering] = useState(false);
@@ -153,9 +155,10 @@ export function Slideshow() {
     <section aria-label="Featured commodities" className="section-y bg-background">
       <div className="container-x">
         <div className="max-w-3xl">
-          <span className="eyebrow">Featured Commodities</span>
+          <span className="eyebrow">{t("catalog.featuredEyebrow")}</span>
           <h2 className="mt-3 text-h2 font-medium leading-[1.1] text-foreground">
-            A living catalog of <span className="italic text-coffee">Ethiopia's harvest</span>
+            {t("catalog.featuredTitleLead")}{" "}
+            <span className="italic text-coffee">{t("catalog.featuredTitleAccent")}</span>
           </h2>
         </div>
       </div>
@@ -222,7 +225,7 @@ export function Slideshow() {
                   params={{ slug: current.slug }}
                   className="group mt-6 inline-flex min-h-[2.75rem] items-center gap-2 rounded-full bg-primary-strong px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
                 >
-                  View product
+                  {t("action.viewProduct")}
                   <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                 </Link>
               </div>
@@ -239,7 +242,7 @@ export function Slideshow() {
                 <button
                   type="button"
                   onClick={() => setPlaying((v) => !v)}
-                  aria-label={playing ? "Pause slideshow" : "Play slideshow"}
+                  aria-label={playing ? t("catalog.pause") : t("catalog.play")}
                   className="grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-black/25 text-white backdrop-blur transition-colors hover:border-gold hover:text-gold"
                 >
                   {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -247,7 +250,7 @@ export function Slideshow() {
                 <button
                   type="button"
                   onClick={() => go(i - 1)}
-                  aria-label="Previous commodity"
+                  aria-label={t("catalog.previous")}
                   className="grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-black/25 text-white backdrop-blur transition-colors hover:border-gold hover:text-gold"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -255,7 +258,7 @@ export function Slideshow() {
                 <button
                   type="button"
                   onClick={() => go(i + 1)}
-                  aria-label="Next commodity"
+                  aria-label={t("catalog.next")}
                   className="grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-black/25 text-white backdrop-blur transition-colors hover:border-gold hover:text-gold"
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -273,7 +276,7 @@ export function Slideshow() {
                 key={slide.slug}
                 type="button"
                 onClick={() => go(index)}
-                aria-label={`Show ${slide.title}`}
+                aria-label={t("catalog.showSlide", { name: slide.title })}
                 aria-current={index === i}
                 className={`h-1 rounded-full transition-all duration-500 ${
                   index === i ? "w-8 bg-gold" : "w-3 bg-white/35 hover:bg-white/60"

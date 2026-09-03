@@ -1,11 +1,13 @@
 import { Facebook, Instagram, Mail } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useSiteContent } from "@/lib/site-content";
+import { useLocalizedContent } from "@/lib/site-content";
 import { scrollToTop } from "@/lib/scroll";
+import { useT } from "@/lib/i18n";
 
 export function SiteFooter() {
-  const { content } = useSiteContent();
+  const content = useLocalizedContent();
   const contact = content.home.contact;
+  const t = useT();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   // On the homepage the router has nowhere to go, so scroll up ourselves.
@@ -88,7 +90,9 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Contact</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
+              {t("footer.contact")}
+            </h4>
             <ul className="mt-5 space-y-3 text-sm text-white/70">
               <li>{contact.address}</li>
               <li>
@@ -139,9 +143,9 @@ export function SiteFooter() {
 
         <div className="mt-14 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-8 text-xs text-white/50">
           <p>
-            © {new Date().getFullYear()} {content.brand.name}. All rights reserved.
+            © {new Date().getFullYear()} {content.brand.name}. {t("footer.rights")}
           </p>
-          <p>Sourcing Ethiopia's finest — for the world.</p>
+          <p>{t("footer.tagline")}</p>
         </div>
       </div>
     </footer>

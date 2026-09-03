@@ -1,5 +1,5 @@
 import { Reveal } from "./Reveal";
-import { useSiteContent } from "@/lib/site-content";
+import { useLocalizedContent } from "@/lib/site-content";
 
 const steps = [
   {
@@ -30,7 +30,7 @@ const steps = [
 ];
 
 export function SourcingProcess() {
-  const { content } = useSiteContent();
+  const content = useLocalizedContent();
   const section = content.home.process;
   return (
     <section id="process" className="section-y bg-beige">
