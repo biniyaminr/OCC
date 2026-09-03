@@ -67,17 +67,15 @@ function writeInbox(messages: InboxMessage[]) {
 export async function addMessage(message: NewMessage): Promise<boolean> {
   if (hasSupabaseCredentials()) {
     try {
-      const { error } = await createClient()
-        .from("messages")
-        .insert({
-          kind: message.kind,
-          subject: message.subject,
-          name: message.name,
-          email: message.email,
-          company: message.company,
-          country: message.country,
-          fields: message.fields,
-        });
+      const { error } = await createClient().from("messages").insert({
+        kind: message.kind,
+        subject: message.subject,
+        name: message.name,
+        email: message.email,
+        company: message.company,
+        country: message.country,
+        fields: message.fields,
+      });
       return !error;
     } catch {
       return false;
