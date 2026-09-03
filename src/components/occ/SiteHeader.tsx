@@ -31,7 +31,15 @@ export function SiteHeader() {
   const panelRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isPartnersPage = pathname === "/partners";
+  /**
+   * The transparent header with white type exists for one reason: the homepage
+   * hero is a dark photograph sitting behind it. Every other route opens on a
+   * light surface, where white-on-light is unreadable — which is why product
+   * pages looked broken until you scrolled. Deriving this from the pathname
+   * alone means it is correct on a direct load, a client navigation, a refresh
+   * and back/forward alike, with no transient state to get out of step.
+   */
+  const overDarkHero = pathname === "/";
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -122,7 +130,7 @@ export function SiteHeader() {
     };
   }, [pathname]);
 
-  const solid = scrolled || isPartnersPage || open;
+  const solid = !overDarkHero || scrolled || open;
 
   const hrefFor = (n: (typeof nav)[number]) =>
     n.route ? n.href : pathname === "/" ? n.href : `/${n.href}`;

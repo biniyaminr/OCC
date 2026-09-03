@@ -487,3 +487,37 @@ const regionToSlug: Record<string, string> = {
 export function getRegionProductSlug(region: string): string | null {
   return regionToSlug[region] ?? null;
 }
+
+/**
+ * Where a sourcing-region chip should lead.
+ *
+ * `regionToSlug` above only ever covered coffee, yet it was applied to every
+ * product. That left 27 of the 30 non-coffee chips inert, and made the three
+ * that did resolve actively wrong — "Jimma" on the Soybeans page navigated to
+ * Jimma Coffee. Resolving against the products that genuinely list the region
+ * removes both faults: a chip either goes somewhere true or is plainly inert.
+ *
+ * Same commodity group wins, the current product is never a destination, and
+ * ties resolve in catalog order so the result is stable between renders.
+ */
+export function resolveRegionLink(
+  region: string,
+  fromSlug: string,
+  categoryId: string,
+): string | null {
+  const sameGroup = allProducts.find(
+    (product) =>
+      product.slug !== fromSlug &&
+      product.categoryId === categoryId &&
+      product.regions.includes(region),
+  );
+  // Deliberately no cross-category fallback. "Jimma" grows both soybeans and
+  // coffee; sending a soybean buyer to a coffee page is worse than an inert
+  // chip, so a region with no sibling in the same group simply does not link.
+  return sameGroup ? sameGroup.slug : null;
+}
+
+/** Products that share a sourcing region, for "also grown here" style listings. */
+export function productsInRegion(region: string) {
+  return allProducts.filter((product) => product.regions.includes(region));
+}

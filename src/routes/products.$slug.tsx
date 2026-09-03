@@ -16,7 +16,7 @@ import { SiteHeader } from "@/components/occ/SiteHeader";
 import { SiteFooter } from "@/components/occ/SiteFooter";
 import { RfqModal } from "@/components/occ/RfqModal";
 import { downloadTechnicalDataSheet } from "@/lib/datasheet";
-import { findProduct, categories, getRegionProductSlug } from "@/data/products";
+import { findProduct, categories, resolveRegionLink } from "@/data/products";
 import { resolveManagedProduct, useManagedCategories, useSiteContent } from "@/lib/site-content";
 import {
   onProductImageError,
@@ -300,7 +300,7 @@ function ProductPage() {
                 </p>
                 <ul className="mt-5 flex flex-wrap gap-2">
                   {product.regions.map((r: string) => {
-                    const slug = getRegionProductSlug(r);
+                    const slug = resolveRegionLink(r, product.slug, category.id);
                     return slug ? (
                       <li key={r}>
                         <Link
