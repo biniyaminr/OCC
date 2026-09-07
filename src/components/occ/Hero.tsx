@@ -28,12 +28,7 @@ export function Hero() {
 
       <div className="container-x relative z-10 py-28 md:py-32">
         <div className="max-w-2xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-white/90 backdrop-blur">
-            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-gold" />
-            {hero.eyebrow}
-          </span>
-
-          <h1 className="mt-7 font-display text-h1 font-medium leading-[1.06] text-white">
+          <h1 className="font-display text-h1 font-medium leading-[1.06] text-white">
             {hero.title}
             <br className="hidden sm:block" />{" "}
             <span className="italic text-gold">{hero.accent}</span>

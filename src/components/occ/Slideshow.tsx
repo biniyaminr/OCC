@@ -112,13 +112,12 @@ const slides: Slide[] = [
 ];
 
 const pad = (n: number) => String(n).padStart(2, "0");
-const HOLD_MS = 6500;
+const HOLD_MS = 2500;
 
 export function Slideshow() {
   const t = useT();
   const { content } = useSiteContent();
   const [i, setI] = useState(0);
-  const [hovering, setHovering] = useState(false);
   const [playing, setPlaying] = useState(true);
   const reduced = useRef(false);
 
@@ -144,10 +143,12 @@ export function Slideshow() {
   const go = useCallback((n: number) => setI((n + slides.length) % slides.length), []);
 
   useEffect(() => {
-    if (!playing || hovering) return;
+    if (!playing) return;
+    // Autoplay is deliberately hover-agnostic: pointer position never pauses or
+    // restarts the timer, so the band keeps advancing under the cursor.
     const id = setInterval(() => setI((v) => (v + 1) % slides.length), HOLD_MS);
     return () => clearInterval(id);
-  }, [playing, hovering]);
+  }, [playing]);
 
   const current = managedSlides[i]!;
 
@@ -164,13 +165,7 @@ export function Slideshow() {
       </div>
 
       {/* Cinematic band — full-bleed, slow crossfade, slow drift. */}
-      <div
-        className="full-bleed relative mt-10 overflow-hidden bg-charcoal"
-        onMouseEnter={() => setHovering(true)}
-        onMouseLeave={() => setHovering(false)}
-        onFocusCapture={() => setHovering(true)}
-        onBlurCapture={() => setHovering(false)}
-      >
+      <div className="full-bleed relative mt-10 overflow-hidden bg-charcoal">
         <div className="relative aspect-[4/5] max-h-[86vh] w-full sm:aspect-[16/9] lg:aspect-[21/9]">
           {managedSlides.map((slide, index) => {
             const active = index === i;
