@@ -1,3 +1,4 @@
+import { seoHead, breadcrumbSchema } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight, ChevronRight, Cpu, Factory, Settings2, ShieldCheck } from "lucide-react";
 import { SiteHeader } from "@/components/occ/SiteHeader";
@@ -30,29 +31,14 @@ const benefits = [
 ];
 
 export const Route = createFileRoute("/partners")({
-  head: () => ({
-    meta: [
-      { title: "Partners — Oragon Commodity Center" },
-      {
-        name: "description",
-        content:
-          "Meet OCC's machinery partners — Hawit Sorter and Wintone Machinery — supplying the optical sorting, cleaning, grading and turnkey processing equipment behind export-grade Ethiopian commodities.",
-      },
-      { property: "og:title", content: "Partners — Oragon Commodity Center" },
-      {
-        property: "og:description",
-        content:
-          "OCC's machinery partners supply the sorting, cleaning, grading and processing technology behind export-grade Ethiopian coffee, pulses, oilseeds and cereals.",
-      },
-      { property: "og:type", content: "website" },
-      {
-        property: "og:url",
-        content: "https://oragontradingplc.lovable.app/partners",
-      },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [{ rel: "canonical", href: "https://oragontradingplc.lovable.app/partners" }],
-  }),
+  head: () =>
+    seoHead({
+      title: "Commodity Processing & Machinery Partners | OCC",
+      description:
+        "Explore OCC's machinery partnerships for optical sorting, cleaning, grading and processing Ethiopian coffee, pulses, oilseeds and cereals.",
+      path: "/partners",
+      schema: [breadcrumbSchema("Partners", "/partners")],
+    }),
   component: PartnersPage,
 });
 

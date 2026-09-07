@@ -1,3 +1,6 @@
+import { loadPublicContent } from "./lib/public-content";
+import { buildManagedCategories } from "./lib/site-content";
+import { absoluteUrl, productPath, sitemapXml } from "./lib/seo";
 import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
@@ -47,9 +50,54 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const pathname = new URL(request.url).pathname;
+      if (
+        (request.method === "GET" || request.method === "HEAD") &&
+        ["/robots.txt", "/sitemap.xml"].includes(pathname)
+      ) {
+        let body: string;
+        if (pathname === "/robots.txt") {
+          // Allow crawling /admin so crawlers can see its noindex directive.
+          body = `User-agent: *\nAllow: /\n\nSitemap: ${absoluteUrl("/sitemap.xml")}\n`;
+        } else {
+          const catalog = await loadPublicContent();
+          if (!catalog.available)
+            return new Response(null, {
+              status: 503,
+              headers: { "Retry-After": "60", "Cache-Control": "no-store" },
+            });
+          const products = buildManagedCategories(catalog.content).flatMap(
+            (category) => category.products,
+          );
+          body = sitemapXml([
+            "/",
+            "/partners",
+            ...products.map((product) => productPath(product.slug)),
+          ]);
+        }
+        return new Response(request.method === "HEAD" ? null : body, {
+          headers: {
+            "Content-Type":
+              pathname === "/robots.txt"
+                ? "text/plain; charset=utf-8"
+                : "application/xml; charset=utf-8",
+            "Cache-Control": "public, max-age=300",
+          },
+        });
+      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const normalized = await normalizeCatastrophicSsrResponse(response);
+      if (pathname === "/admin" || pathname.startsWith("/admin/") || normalized.status >= 400) {
+        const headers = new Headers(normalized.headers);
+        headers.set("X-Robots-Tag", "noindex");
+        return new Response(normalized.body, {
+          status: normalized.status,
+          statusText: normalized.statusText,
+          headers,
+        });
+      }
+      return normalized;
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {

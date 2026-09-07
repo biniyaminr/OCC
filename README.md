@@ -99,3 +99,44 @@ src/
   routes/             /, /partners, /products/$slug, /admin
 supabase/schema.sql   tables, RLS policies, storage bucket
 ```
+
+## Search engine optimization
+
+Public pages include server-rendered titles, descriptions, absolute canonical
+URLs, Open Graph and Twitter previews, and JSON-LD. The homepage identifies the
+organization and website; product pages describe the actual product and its
+specifications, with breadcrumb markup. This is a quote-based catalog, so no
+prices, stock availability, reviews or ratings are invented. Product markup
+alone does not guarantee eligibility for Google's price/review rich results.
+
+Set `VITE_SITE_URL` in the deployment environment to the public origin, then
+rebuild. It defaults to `https://www.oragontradingplc.com`.
+Use the final domain with `https://`, without a path, query or fragment. The same
+origin drives canonicals, social URLs, structured data and sitemap links.
+
+- `/sitemap.xml` lists the homepage, partners and active published products.
+  Deleted and unfinished products are excluded; `/admin` is never listed.
+- `/robots.txt` advertises the sitemap. Admin remains crawlable so search engines
+  can read its `noindex` directive; authentication still protects the studio.
+- The initial HTML and product metadata use an anonymous read of the published
+  `site_content` snapshot, including custom products and edits. No service-role
+  key or visitor/admin session is used. Browser-only unsynced drafts cannot be
+  indexed; publish them through the configured Supabase studio first.
+- Unknown/deleted product URLs return HTTP 404. During a catalog outage, the
+  bundled catalog remains available, but unknown products return an error rather
+  than an incorrect 404, and the sitemap returns 503 instead of advertising an
+  incomplete list. The public read has a five-second timeout.
+- English is the indexable default. The current Chinese switch changes content
+  at the same URL; there are no separate language URLs or hreflang claims.
+
+After deployment, verify the final domain in Google Search Console, submit
+`https://<your-domain>/sitemap.xml`, and inspect the homepage and one custom
+product URL. Check structured data with Google's Rich Results Test. Redirect
+previous domains to the chosen origin in your host settings. Search Console
+verification and domain redirects require the relevant account access and are
+not automatically configured by these source changes.
+
+Run `npm run test:seo` to check real server-rendered pages against a local
+Supabase fixture, including custom/deleted products, canonical URLs, JSON-LD
+escaping, sitemap membership, noindex headers and outage behavior. No production
+credentials are needed. Also run `npx tsc --noEmit` and `npm run build`.

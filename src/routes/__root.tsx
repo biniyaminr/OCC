@@ -1,3 +1,4 @@
+import { loadPublicContent } from "@/lib/public-content";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -75,6 +76,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  beforeLoad: async () => ({ publicCatalog: await loadPublicContent() }),
+  loader: ({ context }) => context.publicCatalog,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -122,11 +125,12 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { content } = Route.useLoaderData();
 
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <SiteContentProvider>
+        <SiteContentProvider initialContent={content}>
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
         </SiteContentProvider>

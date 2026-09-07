@@ -1,5 +1,6 @@
+import { productHead } from "@/lib/seo";
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 import {
   ArrowLeft,
@@ -16,7 +17,7 @@ import { SiteHeader } from "@/components/occ/SiteHeader";
 import { SiteFooter } from "@/components/occ/SiteFooter";
 import { RfqModal } from "@/components/occ/RfqModal";
 import { downloadTechnicalDataSheet } from "@/lib/datasheet";
-import { findProduct, categories, resolveRegionLink } from "@/data/products";
+import { categories, resolveRegionLink } from "@/data/products";
 import { resolveManagedProduct, useManagedCategories, useSiteContent } from "@/lib/site-content";
 import {
   onProductImageError,
@@ -26,32 +27,22 @@ import {
 } from "@/lib/product-image";
 
 export const Route = createFileRoute("/products/$slug")({
-  loader: ({ params }) => {
-    const product = findProduct(params.slug);
-    return { product: product ?? null, slug: params.slug };
-  },
-  head: ({ loaderData }) => {
-    if (!loaderData?.product) {
-      return {
-        meta: [{ title: "Product not found — OCC" }, { name: "robots", content: "noindex" }],
-      };
+  loader: ({ params, context }) => {
+    const product = resolveManagedProduct(params.slug, context.publicCatalog.content);
+    if (!product) {
+      // Do not tell crawlers a custom product was deleted during a database outage.
+      if (!context.publicCatalog.available)
+        throw new Error("Catalog temporarily unavailable. Please try again.");
+      throw notFound();
     }
-    const p = loaderData.product;
-    const title = `${p.name} — Ethiopian ${p.categoryTitle} | OCC`;
-    return {
-      meta: [
-        { title },
-        { name: "description", content: p.tagline },
-        { property: "og:title", content: title },
-        { property: "og:description", content: p.tagline },
-        { property: "og:image", content: p.image },
-        { property: "og:type", content: "product" },
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:image", content: p.image },
-      ],
-      links: [{ rel: "canonical", href: `/products/${p.slug}` }],
-    };
+    return { product, slug: params.slug };
   },
+  head: ({ loaderData }) =>
+    loaderData?.product
+      ? productHead(loaderData.product)
+      : {
+          meta: [{ title: "Product unavailable — OCC" }, { name: "robots", content: "noindex" }],
+        },
   component: ProductPage,
   notFoundComponent: NotFoundView,
   errorComponent: ({ error }) => (

@@ -1,3 +1,4 @@
+import { seoHead, organizationSchema, absoluteUrl } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 import { SiteHeader } from "@/components/occ/SiteHeader";
@@ -14,27 +15,23 @@ import { SourcingProcess } from "@/components/occ/SourcingProcess";
 import { ContactSection } from "@/components/occ/ContactSection";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "OCC — Premium Ethiopian Agricultural Commodities for Global Markets" },
-      {
-        name: "description",
-        content:
-          "Oragon Commodity Center connects the world's markets with Ethiopia's agricultural excellence through trusted partnerships, uncompromising quality, transparent trade, and innovative commodity solutions.",
-      },
-      {
-        property: "og:title",
-        content: "OCC — Premium Ethiopian Agricultural Commodities",
-      },
-      {
-        property: "og:description",
-        content:
-          "Oragon Commodity Center connects the world's markets with Ethiopia's agricultural excellence through trusted partnerships, quality, transparent trade, and innovative commodity solutions.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () =>
+    seoHead({
+      title: "Ethiopian Coffee, Oilseeds, Pulses & Cereals | OCC",
+      description:
+        "Source Ethiopian coffee, sesame, pulses and cereals through Oragon Commodity Center. Explore origins, product specifications and packaging, and request a quote.",
+      path: "/",
+      schema: [
+        organizationSchema(),
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Oragon Commodity Center",
+          url: absoluteUrl("/"),
+          publisher: { "@id": absoluteUrl("/#organization") },
+        },
+      ],
+    }),
   component: Home,
 });
 

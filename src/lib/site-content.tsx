@@ -337,7 +337,7 @@ function normalizeStoredContent(stored: unknown): SiteContent {
 }
 
 /** Cold-start read: safe to discard records abandoned in an earlier session. */
-function loadFresh(stored: unknown): SiteContent {
+export function loadFresh(stored: unknown): SiteContent {
   return purgePlaceholders(normalizeStoredContent(stored));
 }
 
@@ -498,8 +498,14 @@ async function persistSupabaseContent(content: SiteContent): Promise<SiteContent
   return prepared;
 }
 
-export function SiteContentProvider({ children }: { children: ReactNode }) {
-  const [content, setContentState] = useState(defaultSiteContent);
+export function SiteContentProvider({
+  children,
+  initialContent = defaultSiteContent,
+}: {
+  children: ReactNode;
+  initialContent?: SiteContent;
+}) {
+  const [content, setContentState] = useState(initialContent);
   const [ready, setReady] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [saveError, setSaveError] = useState("");
