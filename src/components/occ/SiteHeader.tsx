@@ -168,133 +168,141 @@ export function SiteHeader() {
   );
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
-        solid
-          ? "border-b border-border bg-background/95 shadow-[0_1px_20px_rgba(33,21,15,0.06)] backdrop-blur-md"
-          : "border-b border-transparent bg-transparent"
-      }`}
-    >
-      <div className="container-x grid h-[4.25rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 lg:h-[4.875rem]">
-        <Link
-          to="/"
-          onClick={onBrandClick}
-          aria-label={`${content.brand.shortName} — ${t("nav.home")}`}
-          className="flex min-w-0 items-center gap-3 rounded-xl"
-        >
-          <img
-            src={content.brand.logo}
-            alt={content.brand.name}
-            width={96}
-            height={96}
-            className="h-11 w-11 shrink-0 rounded-full object-cover ring-1 ring-border lg:h-12 lg:w-12"
-          />
-          <span className="flex min-w-0 flex-col leading-tight">
-            <span
-              className={`font-display text-xl font-semibold tracking-tight lg:text-[1.4rem] ${
+    <>
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+          solid
+            ? "border-b border-border bg-background/95 shadow-[0_1px_20px_rgba(33,21,15,0.06)] backdrop-blur-md"
+            : "border-b border-transparent bg-transparent"
+        }`}
+      >
+        <div className="container-x grid h-[4.25rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 lg:h-[4.875rem]">
+          <Link
+            to="/"
+            onClick={onBrandClick}
+            aria-label={`${content.brand.shortName} — ${t("nav.home")}`}
+            className="flex min-w-0 items-center gap-3 rounded-xl"
+          >
+            <img
+              src={content.brand.logo}
+              alt={content.brand.name}
+              width={96}
+              height={96}
+              className="h-11 w-11 shrink-0 rounded-full object-cover ring-1 ring-border lg:h-12 lg:w-12"
+            />
+            <span className="flex min-w-0 flex-col leading-tight">
+              <span
+                className={`font-display text-xl font-semibold tracking-tight lg:text-[1.4rem] ${
+                  solid ? "text-foreground" : "text-white"
+                }`}
+              >
+                {content.brand.shortName}
+              </span>
+              <span
+                className={`truncate text-[0.62rem] uppercase tracking-[0.18em] ${
+                  solid ? "text-muted-foreground" : "text-white/75"
+                }`}
+              >
+                {content.brand.name}
+              </span>
+            </span>
+          </Link>
+
+          <div className="flex items-center gap-2">
+            <nav aria-label={t("nav.main")} className="hidden items-center gap-1 lg:flex">
+              {nav.map((n) => {
+                const active = isActive(n);
+                const base = solid
+                  ? "text-foreground/75 hover:text-primary-strong"
+                  : "text-white/85 hover:text-gold";
+                const cls = `relative rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
+                  active ? "bg-primary/12 text-primary-strong" : base
+                }`;
+                return n.route ? (
+                  <Link
+                    key={n.href}
+                    to={n.href}
+                    className={cls}
+                    aria-current={active ? "page" : undefined}
+                  >
+                    {t(n.key)}
+                  </Link>
+                ) : (
+                  <a
+                    key={n.href}
+                    href={hrefFor(n)}
+                    onClick={(e) => onAnchorClick(e, n.href)}
+                    className={cls}
+                    aria-current={active ? "true" : undefined}
+                  >
+                    {t(n.key)}
+                  </a>
+                );
+              })}
+            </nav>
+
+            <div
+              role="group"
+              aria-label="Language"
+              className={`hidden items-center gap-0.5 rounded-full border p-0.5 lg:inline-flex ${
+                solid ? "border-border bg-card" : "border-white/25 bg-white/10 backdrop-blur"
+              }`}
+            >
+              {LANGUAGES.map((option) => {
+                const active = language === option.code;
+                return (
+                  <button
+                    key={option.code}
+                    type="button"
+                    lang={option.code === "zh" ? "zh-CN" : "en"}
+                    onClick={() => setLanguage(option.code)}
+                    aria-label={option.aria}
+                    aria-pressed={active}
+                    className={`rounded-full px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                      active
+                        ? "bg-primary-strong text-primary-foreground"
+                        : solid
+                          ? "text-foreground/70 hover:text-primary-strong"
+                          : "text-white/80 hover:text-white"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <a
+              href="/#contact"
+              onClick={(e) => onAnchorClick(e, "#contact")}
+              className="hidden min-h-[2.75rem] items-center rounded-full bg-primary-strong px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover lg:inline-flex"
+            >
+              {t("nav.contact")}
+            </a>
+
+            <button
+              ref={closeButtonRef}
+              type="button"
+              aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
+              aria-expanded={open}
+              aria-controls="mobile-menu"
+              onClick={() => setOpen((v) => !v)}
+              className={`grid h-11 w-11 place-items-center rounded-full lg:hidden ${
                 solid ? "text-foreground" : "text-white"
               }`}
             >
-              {content.brand.shortName}
-            </span>
-            <span
-              className={`truncate text-[0.62rem] uppercase tracking-[0.18em] ${
-                solid ? "text-muted-foreground" : "text-white/75"
-              }`}
-            >
-              {content.brand.name}
-            </span>
-          </span>
-        </Link>
-
-        <div className="flex items-center gap-2">
-          <nav aria-label={t("nav.main")} className="hidden items-center gap-1 lg:flex">
-            {nav.map((n) => {
-              const active = isActive(n);
-              const base = solid
-                ? "text-foreground/75 hover:text-primary-strong"
-                : "text-white/85 hover:text-gold";
-              const cls = `relative rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
-                active ? "bg-primary/12 text-primary-strong" : base
-              }`;
-              return n.route ? (
-                <Link
-                  key={n.href}
-                  to={n.href}
-                  className={cls}
-                  aria-current={active ? "page" : undefined}
-                >
-                  {t(n.key)}
-                </Link>
-              ) : (
-                <a
-                  key={n.href}
-                  href={hrefFor(n)}
-                  onClick={(e) => onAnchorClick(e, n.href)}
-                  className={cls}
-                  aria-current={active ? "true" : undefined}
-                >
-                  {t(n.key)}
-                </a>
-              );
-            })}
-          </nav>
-
-          <div
-            role="group"
-            aria-label="Language"
-            className={`hidden items-center gap-0.5 rounded-full border p-0.5 lg:inline-flex ${
-              solid ? "border-border bg-card" : "border-white/25 bg-white/10 backdrop-blur"
-            }`}
-          >
-            {LANGUAGES.map((option) => {
-              const active = language === option.code;
-              return (
-                <button
-                  key={option.code}
-                  type="button"
-                  lang={option.code === "zh" ? "zh-CN" : "en"}
-                  onClick={() => setLanguage(option.code)}
-                  aria-label={option.aria}
-                  aria-pressed={active}
-                  className={`rounded-full px-2.5 py-1.5 text-xs font-semibold transition-colors ${
-                    active
-                      ? "bg-primary-strong text-primary-foreground"
-                      : solid
-                        ? "text-foreground/70 hover:text-primary-strong"
-                        : "text-white/80 hover:text-white"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
-
-          <a
-            href="/#contact"
-            onClick={(e) => onAnchorClick(e, "#contact")}
-            className="hidden min-h-[2.75rem] items-center rounded-full bg-primary-strong px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover lg:inline-flex"
-          >
-            {t("nav.contact")}
-          </a>
-
-          <button
-            ref={closeButtonRef}
-            type="button"
-            aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
-            aria-expanded={open}
-            aria-controls="mobile-menu"
-            onClick={() => setOpen((v) => !v)}
-            className={`grid h-11 w-11 place-items-center rounded-full lg:hidden ${
-              solid ? "text-foreground" : "text-white"
-            }`}
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
         </div>
-      </div>
+      </header>
 
+      {/*
+       * The drawer lives outside <header> on purpose: the open header gets
+       * backdrop-blur, and backdrop-filter turns an element into the containing
+       * block for fixed descendants — which squeezed this fixed panel into the
+       * 68px header box so the menu never showed.
+       */}
       {open && (
         <div
           ref={panelRef}
@@ -373,6 +381,6 @@ export function SiteHeader() {
           </nav>
         </div>
       )}
-    </header>
+    </>
   );
 }
