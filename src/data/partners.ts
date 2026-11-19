@@ -1,3 +1,7 @@
+import hawitTeam1 from "@/assets/hawit-team-sorter-1.webp";
+import hawitTeam2 from "@/assets/hawit-team-sorter-2.webp";
+import hawitTesting from "@/assets/hawit-sorter-testing.webp";
+
 export type PartnerProduct = {
   name: string;
   image: string;
@@ -21,6 +25,8 @@ export type Partner = {
   serves: string[];
   offerings: PartnerOffering[];
   gallery: PartnerProduct[];
+  /** Real photos from site visits, factory tests and installations. */
+  photos?: PartnerProduct[];
 };
 
 export const partners: Partner[] = [
@@ -230,6 +236,20 @@ export const partners: Partner[] = [
       "Spare parts and service in Ethiopia",
     ],
     serves: ["Coffee", "Pulses", "Oilseeds", "Cereals", "The whole line of grain"],
+    photos: [
+      {
+        name: "The team with the Hawit Vigila AI optical sorter",
+        image: hawitTeam1,
+      },
+      {
+        name: "Testing the Vigila sorter on a live batch",
+        image: hawitTesting,
+      },
+      {
+        name: "With the Hawit team beside the Vigila sorter",
+        image: hawitTeam2,
+      },
+    ],
     offerings: [
       {
         title: "Optical sorters by crop",

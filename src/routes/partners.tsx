@@ -148,6 +148,33 @@ function PartnersPage() {
                       </div>
                     </div>
 
+                    {p.photos && p.photos.length > 0 && (
+                      <div className="mt-9">
+                        <h3 className="border-b border-border pb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-gold">
+                          On site
+                        </h3>
+                        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                          {p.photos.map((photo) => (
+                            <figure
+                              key={photo.image}
+                              className="overflow-hidden border border-border"
+                            >
+                              <img
+                                src={photo.image}
+                                alt={photo.name}
+                                loading="lazy"
+                                decoding="async"
+                                className="aspect-[4/3] w-full object-cover"
+                              />
+                              <figcaption className="px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+                                {photo.name}
+                              </figcaption>
+                            </figure>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {p.offerings.length > 0 && (
                       <div className="mt-9">
                         <h3 className="border-b border-border pb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-gold">
