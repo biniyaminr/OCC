@@ -11,6 +11,7 @@ import { AboutSection } from "@/components/occ/AboutSection";
 import { ProductCategories } from "@/components/occ/ProductCategories";
 import { WhyEthiopia } from "@/components/occ/WhyEthiopia";
 import { WhyOCC } from "@/components/occ/WhyOCC";
+import { QualitySorting } from "@/components/occ/QualitySorting";
 import { SourcingProcess } from "@/components/occ/SourcingProcess";
 import { ContactSection } from "@/components/occ/ContactSection";
 
@@ -49,6 +50,7 @@ function Home() {
         <ProductCategories />
         <WhyEthiopia />
         <WhyOCC />
+        <QualitySorting />
         <SourcingProcess />
         <ContactSection />
       </main>
