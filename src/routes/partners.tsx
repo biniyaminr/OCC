@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/occ/SiteHeader";
 import { SiteFooter } from "@/components/occ/SiteFooter";
 import { Reveal } from "@/components/occ/Reveal";
 import { PartnerCarousel } from "@/components/occ/PartnerCarousel";
+import { QualitySorting } from "@/components/occ/QualitySorting";
 import { resolveManagedPartners, useSiteContent } from "@/lib/site-content";
 
 const benefits = [
@@ -220,6 +221,8 @@ function PartnersPage() {
             ))}
           </div>
         </section>
+
+        <QualitySorting />
 
         <section className="relative overflow-hidden py-16 md:py-24">
           <div aria-hidden className="tech-grid pointer-events-none absolute inset-0 opacity-40" />
