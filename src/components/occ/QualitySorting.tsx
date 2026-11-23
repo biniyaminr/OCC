@@ -18,7 +18,7 @@ const copy = {
     ],
     videosTitle: "Videos",
     video1: "Diego Loria (Degma, Gessi brand) on testing the Hawit sorter in Argentina",
-    video1Note: "In Spanish, with English and Chinese subtitles.",
+    video1Note: "In Spanish, with English subtitles.",
     video2: "A Hawit colour sorter running at the factory",
     video2Note: "Machine sound only, no speech.",
     transcript: "Read the transcript",
@@ -41,7 +41,7 @@ const copy = {
     ],
     videosTitle: "视频",
     video1: "Diego Loria（Degma，Gessi 品牌）介绍在阿根廷测试 Hawit 色选机",
-    video1Note: "西班牙语原声，附英文和中文字幕。",
+    video1Note: "西班牙语原声，附英文字幕。",
     video2: "Hawit 色选机在工厂运行",
     video2Note: "仅机器声音，无讲话。",
     transcript: "查看文字稿",
@@ -109,14 +109,7 @@ export function QualitySorting() {
                   src="/videos/vigila-test-argentina.en.vtt"
                   srcLang="en"
                   label="English"
-                  default={!isZh}
-                />
-                <track
-                  kind="subtitles"
-                  src="/videos/vigila-test-argentina.zh.vtt"
-                  srcLang="zh"
-                  label="中文"
-                  default={isZh}
+                  default
                 />
                 <track
                   kind="subtitles"
