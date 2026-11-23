@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/occ/SiteFooter";
 import { Reveal } from "@/components/occ/Reveal";
 import { PartnerCarousel } from "@/components/occ/PartnerCarousel";
 import { QualitySorting } from "@/components/occ/QualitySorting";
+import { HawitExpoSlideshow } from "@/components/occ/HawitExpoSlideshow";
 import { resolveManagedPartners, useSiteContent } from "@/lib/site-content";
 
 const benefits = [
@@ -148,6 +149,12 @@ function PartnersPage() {
                         />
                       </div>
                     </div>
+
+                    {p.slug === "hawit-sorter" && (
+                      <div className="mt-9">
+                        <HawitExpoSlideshow />
+                      </div>
+                    )}
 
                     {p.offerings.length > 0 && (
                       <div className="mt-9">
