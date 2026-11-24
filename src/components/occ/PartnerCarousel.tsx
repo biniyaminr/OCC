@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import type { PartnerProduct } from "@/data/partners";
+import { ZoomLightbox } from "./ZoomLightbox";
 
 type Props = {
   items: PartnerProduct[];
@@ -11,12 +12,13 @@ type Props = {
 
 export function PartnerCarousel({ items, label, interval = 3500, overlay = [] }: Props) {
   const [i, setI] = useState(0);
+  const [zoomOpen, setZoomOpen] = useState(false);
 
   useEffect(() => {
-    if (items.length < 2) return;
+    if (items.length < 2 || zoomOpen) return;
     const id = setInterval(() => setI((v) => (v + 1) % items.length), interval);
     return () => clearInterval(id);
-  }, [items.length, interval]);
+  }, [items.length, interval, zoomOpen]);
 
   if (items.length === 0) return null;
 
@@ -38,7 +40,8 @@ export function PartnerCarousel({ items, label, interval = 3500, overlay = [] }:
               alt={`${item.name} — ${label}`}
               referrerPolicy="no-referrer"
               loading={idx === 0 ? "eager" : "lazy"}
-              className="h-full w-full bg-white object-contain p-4"
+              className="h-full w-full cursor-zoom-in bg-white object-contain p-4"
+              onClick={idx === i ? () => setZoomOpen(true) : undefined}
             />
           </div>
         ))}
@@ -62,6 +65,16 @@ export function PartnerCarousel({ items, label, interval = 3500, overlay = [] }:
             {items[i].name}
           </p>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setZoomOpen(true)}
+          aria-label={`View ${items[i].name} full screen and zoom`}
+          title="View full screen and zoom"
+          className="absolute bottom-3 right-3 grid h-9 w-9 place-items-center border border-white/30 bg-black/45 text-white transition-colors hover:bg-gold hover:text-gold-foreground"
+        >
+          <Maximize2 className="h-4 w-4" />
+        </button>
 
         <button
           type="button"
@@ -97,6 +110,16 @@ export function PartnerCarousel({ items, label, interval = 3500, overlay = [] }:
           {String(i + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}
         </span>
       </div>
+      <ZoomLightbox
+        images={items.map((item) => item.image)}
+        captions={items.map((item) =>
+          item.name === label ? item.name : `${item.name} — ${label}`,
+        )}
+        index={i}
+        open={zoomOpen}
+        onOpenChange={setZoomOpen}
+        onIndexChange={go}
+      />
     </div>
   );
 }

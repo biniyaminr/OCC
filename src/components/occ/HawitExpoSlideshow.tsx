@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize2, Pause, Play } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
+import { ZoomLightbox } from "./ZoomLightbox";
 import expo1 from "@/assets/hawit-expo-1.webp";
 import expo2 from "@/assets/hawit-expo-2.webp";
 import expo3 from "@/assets/hawit-expo-3.webp";
@@ -27,6 +28,7 @@ const copy = {
     pause: "Pause slideshow",
     play: "Play slideshow",
     show: (n: number) => `Show photo ${n}`,
+    enlarge: "View full screen and zoom",
   },
   zh: {
     heading: "展会现场",
@@ -44,6 +46,7 @@ const copy = {
     pause: "暂停播放",
     play: "播放",
     show: (n: number) => `显示第 ${n} 张`,
+    enlarge: "全屏查看并缩放",
   },
 };
 
@@ -55,6 +58,8 @@ export function HawitExpoSlideshow() {
   const t = language === "zh" ? copy.zh : copy.en;
   const [i, setI] = useState(0);
   const [playing, setPlaying] = useState(true);
+  const [zoomOpen, setZoomOpen] = useState(false);
+  const resumeAfterZoom = useRef(false);
   const touchX = useRef<number | null>(null);
 
   useEffect(() => {
@@ -64,12 +69,18 @@ export function HawitExpoSlideshow() {
   const go = useCallback((n: number) => setI((n + images.length) % images.length), []);
 
   useEffect(() => {
-    if (!playing) return;
+    if (!playing || zoomOpen) return;
     const id = setInterval(() => {
       if (document.visibilityState === "visible") setI((v) => (v + 1) % images.length);
     }, HOLD_MS);
     return () => clearInterval(id);
-  }, [playing, i]);
+  }, [playing, zoomOpen, i]);
+
+  const openZoom = () => {
+    resumeAfterZoom.current = playing;
+    setPlaying(false);
+    setZoomOpen(true);
+  };
 
   const btn =
     "grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-black/35 text-white backdrop-blur transition-colors hover:border-gold hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold";
@@ -123,7 +134,8 @@ export function HawitExpoSlideshow() {
                   alt={active ? t.captions[index] : ""}
                   loading={index === 0 ? "eager" : "lazy"}
                   decoding="async"
-                  className="relative h-full w-full object-contain"
+                  className="relative h-full w-full cursor-zoom-in object-contain"
+                  onClick={active ? openZoom : undefined}
                 />
               </div>
             );
@@ -139,6 +151,15 @@ export function HawitExpoSlideshow() {
               {pad(i + 1)} <span className="text-white/45">/ {pad(images.length)}</span>
             </p>
             <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={openZoom}
+                aria-label={t.enlarge}
+                title={t.enlarge}
+                className={btn}
+              >
+                <Maximize2 className="h-4 w-4" />
+              </button>
               <button
                 type="button"
                 onClick={() => setPlaying((v) => !v)}
@@ -163,7 +184,7 @@ export function HawitExpoSlideshow() {
 
           <p
             aria-live="polite"
-            className="absolute inset-x-0 bottom-0 px-5 pb-4 text-sm leading-relaxed text-white"
+            className="pointer-events-none absolute inset-x-0 bottom-0 px-5 pb-4 text-sm leading-relaxed text-white"
           >
             {t.captions[i]}
           </p>
@@ -188,6 +209,17 @@ export function HawitExpoSlideshow() {
           ))}
         </div>
       </div>
+      <ZoomLightbox
+        images={images}
+        captions={t.captions}
+        index={i}
+        open={zoomOpen}
+        onOpenChange={(open) => {
+          setZoomOpen(open);
+          if (!open && resumeAfterZoom.current) setPlaying(true);
+        }}
+        onIndexChange={go}
+      />
     </div>
   );
 }
