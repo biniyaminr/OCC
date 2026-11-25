@@ -1,4 +1,7 @@
+import { useState } from "react";
+import { Maximize2 } from "lucide-react";
 import { Reveal } from "./Reveal";
+import { ZoomLightbox } from "./ZoomLightbox";
 import { useLanguage } from "@/lib/i18n";
 import sortingTeam1 from "@/assets/sorting-team-1.webp";
 import sortingTest from "@/assets/sorting-test.webp";
@@ -22,6 +25,7 @@ const copy = {
     video2: "A Hawit colour sorter running at the factory",
     video2Note: "Machine sound only, no speech.",
     transcript: "Read the transcript",
+    enlarge: "View full screen and zoom",
     transcriptText: [
       "Good morning, how is everyone? This is Diego Loria from the company Degma, of the Gessi brand.",
       "Today we are using the Hawit machine, a colour sorter we have tested on different products used or grown in Argentina: beans, wheat, adzuki beans, white beans, black beans, and we even tested it with small grains.",
@@ -45,6 +49,7 @@ const copy = {
     video2: "Hawit 色选机在工厂运行",
     video2Note: "仅机器声音，无讲话。",
     transcript: "查看文字稿",
+    enlarge: "全屏查看并缩放",
     transcriptText: [
       "大家早上好。我是 Gessi 品牌旗下 Degma 公司的 Diego Loria。",
       "今天我们正在使用 Hawit 品牌的色选机。我们用它测试了阿根廷常用及本地出产的多种物料：豆类、小麦、红小豆、白芸豆、黑豆，甚至还测试了小粒谷物。",
@@ -59,6 +64,8 @@ export function QualitySorting() {
   const { language } = useLanguage();
   const isZh = language === "zh";
   const t = isZh ? copy.zh : copy.en;
+  const [zoomIndex, setZoomIndex] = useState(0);
+  const [zoomOpen, setZoomOpen] = useState(false);
   return (
     <section id="quality-sorting" className="section-y relative overflow-hidden bg-background">
       <div className="container-x relative">
@@ -76,13 +83,29 @@ export function QualitySorting() {
           {images.map((src, i) => (
             <Reveal key={src} delay={i * 80}>
               <figure className="h-full overflow-hidden rounded-3xl border border-border bg-card">
-                <img
-                  src={src}
-                  alt={t.photos[i]}
-                  loading="lazy"
-                  decoding="async"
-                  className="aspect-[4/3] w-full object-cover"
-                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setZoomIndex(i);
+                    setZoomOpen(true);
+                  }}
+                  aria-label={`${t.enlarge}: ${t.photos[i]}`}
+                  className="group relative block w-full cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold"
+                >
+                  <img
+                    src={src}
+                    alt={t.photos[i]}
+                    loading="lazy"
+                    decoding="async"
+                    className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                  />
+                  <span
+                    aria-hidden
+                    className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-black/40 text-white backdrop-blur transition-colors group-hover:border-gold group-hover:text-gold"
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                  </span>
+                </button>
                 <figcaption className="px-5 py-4 text-sm leading-relaxed text-muted-foreground">
                   {t.photos[i]}
                 </figcaption>
@@ -90,6 +113,15 @@ export function QualitySorting() {
             </Reveal>
           ))}
         </div>
+
+        <ZoomLightbox
+          images={images}
+          captions={[...t.photos]}
+          index={zoomIndex}
+          open={zoomOpen}
+          onOpenChange={setZoomOpen}
+          onIndexChange={setZoomIndex}
+        />
 
         <h3 className="mt-14 font-display text-2xl font-medium text-foreground">{t.videosTitle}</h3>
         <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
